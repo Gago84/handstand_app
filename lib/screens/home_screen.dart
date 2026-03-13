@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../data/exercise_data.dart';
 import 'exercise_detail_screen.dart';
+import 'about_screen.dart';
+
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -11,6 +13,19 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Handstand Free"),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AboutScreen(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: ListView.builder(
         itemCount: exercises.length,
