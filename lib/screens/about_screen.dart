@@ -46,7 +46,7 @@ class AboutScreen extends StatelessWidget {
 
             SizedBox(height: 10),
 
-            Text("Email: your@email.com"),
+            Text("Email: giang131084@gmail.com"),
 
             SizedBox(height: 30),
 
