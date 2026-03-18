@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "365820859466",
+    "project_id": "banana-57559",
+    "storage_bucket": "banana-57559.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:365820859466:android:89958f537950d5c18582b3",
+        "android_client_info": {
+          "package_name": "com.example.handstand_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "365820859466-f6m0a854522u43ed6tvodcit8igi038n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBjaOn20FP4dN2Ogrp8oiH0tAeyPIyDo6I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "365820859466-f6m0a854522u43ed6tvodcit8igi038n.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "365820859466-qaaku3igl9ojaj1sfa3faq2e29btkgkk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.handstandApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
