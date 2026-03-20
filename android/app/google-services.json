@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:365820859466:android:89958f537950d5c18582b3",
+        "mobilesdk_app_id": "1:365820859466:android:0549cebc76acdb238582b3",
         "android_client_info": {
-          "package_name": "com.example.handstand_app"
+          "package_name": "com.giang.handstandtrainer"
         }
       },
       "oauth_client": [

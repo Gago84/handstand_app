@@ -1,4 +1,4 @@
-package com.example.handstand_app
+package com.giang.handstandtrainer
 
 import io.flutter.embedding.android.FlutterActivity
 
