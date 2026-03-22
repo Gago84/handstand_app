@@ -17,7 +17,7 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
     super.initState();
 
     _bannerAd = BannerAd(
-      adUnitId: 'ca-app-pub-3940256099942544/2934735716', // TEST ID
+      adUnitId: 'ca-app-pub-3940256099942544/2934735716',
       size: AdSize.banner,
       request: const AdRequest(),
       listener: BannerAdListener(
@@ -28,7 +28,6 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
         },
         onAdFailedToLoad: (ad, error) {
           ad.dispose();
-          print('Ad failed: $error');
         },
       ),
     );
@@ -44,12 +43,18 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_isLoaded) return const SizedBox();
-
-    return SizedBox(
-      width: _bannerAd!.size.width.toDouble(),
-      height: _bannerAd!.size.height.toDouble(),
-      child: AdWidget(ad: _bannerAd!),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      height: _isLoaded ? 60 : 0, // 👈 smooth animation
+      child: _isLoaded
+          ? Center(
+              child: SizedBox(
+                width: _bannerAd!.size.width.toDouble(),
+                height: _bannerAd!.size.height.toDouble(),
+                child: AdWidget(ad: _bannerAd!),
+              ),
+            )
+          : const SizedBox(),
     );
   }
 }

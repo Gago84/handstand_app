@@ -13,6 +13,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return Scaffold(
+      
       appBar: AppBar(
         title: const Text("Handstand Free"),
         centerTitle: true,
@@ -31,36 +32,26 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
 
-      // 🔥 LOAD FIREBASE DATA
- body: Column(
-  children: [
-    Expanded(
-      child: StreamBuilder<QuerySnapshot>(
+      // 🔥 BODY
+      body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('HandStand')
             .orderBy('order')
             .snapshots(),
         builder: (context, snapshot) {
-          // loading
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          // error
           if (snapshot.hasError) {
-            return Center(
-              child: Text("Error: ${snapshot.error}"),
-            );
+            return Center(child: Text("Error: ${snapshot.error}"));
           }
 
-          // empty
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return const Center(child: Text("No exercises found"));
           }
 
-          final docs = snapshot.data!.docs;
-
-          final exercises = docs.map((doc) {
+          final exercises = snapshot.data!.docs.map((doc) {
             return Exercise.fromFirestore(
                 doc.id, doc.data() as Map<String, dynamic>);
           }).toList();
@@ -68,16 +59,25 @@ class HomeScreen extends StatelessWidget {
           exercises.sort((a, b) => a.order.compareTo(b.order));
 
           return ListView.builder(
+            padding: const EdgeInsets.only(bottom: 16), // 👈 nhẹ thôi
             itemCount: exercises.length,
             itemBuilder: (context, index) {
               final exercise = exercises[index];
 
               return Card(
-                margin: const EdgeInsets.all(12),
+                elevation: 3,
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16), // 👈 bo góc đẹp
+                ),
                 child: ListTile(
+                  contentPadding: const EdgeInsets.all(16),
                   title: Text(
                     "Step ${index + 1}: ${exercise.title}",
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
                   subtitle: Text(
                     exercise.description.isEmpty
@@ -100,12 +100,15 @@ class HomeScreen extends StatelessWidget {
           );
         },
       ),
-    ),
 
-    // 👇 ADS LUÔN Ở DƯỚI
-    const BannerAdWidget(),
-  ],
-),
+      // 👇 👇 👇 QUAN TRỌNG NHẤT
+      bottomNavigationBar: const SafeArea(
+        child: Padding(
+          padding: EdgeInsets.only(bottom: 8),
+          child: BannerAdWidget(),
+        ),
+      ),
+
     );
   }
 }
