@@ -4,6 +4,7 @@ import '../models/exercise.dart';
 import 'exercise_detail_screen.dart';
 import 'about_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../widgets/banner_ad_widget.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -31,68 +32,80 @@ class HomeScreen extends StatelessWidget {
       ),
 
       // 🔥 LOAD FIREBASE DATA
-      body:StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance.collection('HandStand').orderBy('order').snapshots(),
-          builder: (context, snapshot) {
-            // loading
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
+ body: Column(
+  children: [
+    Expanded(
+      child: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('HandStand')
+            .orderBy('order')
+            .snapshots(),
+        builder: (context, snapshot) {
+          // loading
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-            // error
-            if (snapshot.hasError) {
-              return Center(
-                child: Text("Error: ${snapshot.error}"),
-              );
-            }
+          // error
+          if (snapshot.hasError) {
+            return Center(
+              child: Text("Error: ${snapshot.error}"),
+            );
+          }
 
-            // empty
-            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return const Center(child: Text("No exercises found"));
-            }
+          // empty
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(child: Text("No exercises found"));
+          }
 
-            final docs = snapshot.data!.docs;
+          final docs = snapshot.data!.docs;
 
-            final exercises = docs.map((doc) {
-              return Exercise.fromFirestore(doc.id, doc.data() as Map<String, dynamic>);
-            }).toList();
+          final exercises = docs.map((doc) {
+            return Exercise.fromFirestore(
+                doc.id, doc.data() as Map<String, dynamic>);
+          }).toList();
 
-            exercises.sort((a, b) => a.order.compareTo(b.order));
+          exercises.sort((a, b) => a.order.compareTo(b.order));
 
-            // list
-            return ListView.builder(
-              itemCount: exercises.length,
-              itemBuilder: (context, index) {
-                final exercise = exercises[index];
+          return ListView.builder(
+            itemCount: exercises.length,
+            itemBuilder: (context, index) {
+              final exercise = exercises[index];
 
-                return Card(
-                  margin: const EdgeInsets.all(12),
-                  child: ListTile(
+              return Card(
+                margin: const EdgeInsets.all(12),
+                child: ListTile(
                   title: Text(
                     "Step ${index + 1}: ${exercise.title}",
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                    subtitle: Text(
-                      exercise.description.isEmpty
-                          ? "Tap to view video"
-                          : exercise.description,
-                    ),
-                    trailing: const Icon(Icons.arrow_forward_ios),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              ExerciseDetailScreen(exercise: exercise),
-                        ),
-                      );
-                    },
+                  subtitle: Text(
+                    exercise.description.isEmpty
+                        ? "Tap to view video"
+                        : exercise.description,
                   ),
-                );
-              },
-            );
-          },
-        )
+                  trailing: const Icon(Icons.arrow_forward_ios),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            ExerciseDetailScreen(exercise: exercise),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          );
+        },
+      ),
+    ),
+
+    // 👇 ADS LUÔN Ở DƯỚI
+    const BannerAdWidget(),
+  ],
+),
     );
   }
 }
