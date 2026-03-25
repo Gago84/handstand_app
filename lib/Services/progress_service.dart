@@ -12,10 +12,14 @@ class ProgressService {
     final prefs = await SharedPreferences.getInstance();
     final list = prefs.getStringList(key) ?? [];
 
+    print("🔥 BEFORE SAVE: $list");
+
     if (!list.contains(id)) {
       list.add(id);
       await prefs.setStringList(key, list);
     }
+
+    print("🔥 AFTER SAVE: $list");
   }
 
   static Future<bool> isDone(String id) async {

@@ -23,6 +23,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // 🔥 ADD THIS
   bool isWarmupValid = false;
+  // 🔥 ADD THIS LINE (NGAY TẠI ĐÂY)
+  Set<String> completedSteps = {};
 
   @override
   void initState() {
@@ -32,6 +34,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     loadSubscription();
     loadWarmupStatus(); // 🔥 ADD THIS
+    loadProgress(); // 🔥 ADD THIS
+
       // 🔥 AUTO CHECK mỗi 10s (test), production 60s
     _timer = Timer.periodic(const Duration(seconds: 10), (_) {
       loadWarmupStatus();
@@ -54,6 +58,15 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       isWarmupValid = valid;
     });
+  }
+  // 🔥 ADD THIS FUNCTION
+  Future<void> loadProgress() async {
+    final list = await ProgressService.getCompleted();
+    setState(() {
+      completedSteps = list.toSet();
+    });
+    print("🔥 completedSteps AFTER setState: $completedSteps"); // 🔥 ADD
+
   }
 
   @override
@@ -89,6 +102,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   builder: (context) => const SubscriptionPage(),
                 ),
               );
+              // 🔥 ADD THIS
+              await loadProgress();
 
               loadSubscription();
             },
@@ -128,8 +143,12 @@ class _HomeScreenState extends State<HomeScreen> {
             itemBuilder: (context, index) {
               final exercise = exercises[index];
 
-              // 🔥 LOCK LOGIC
-              final isLocked = index > 0 && !isWarmupValid;
+              final isLocked =
+                  index > 0 &&
+                  (
+                    !isWarmupValid || // 🔥 chưa warmup
+                    !completedSteps.contains("step_${index - 1}") // 🔥 chưa pass step trước
+                  );
 
               return Card(
                 elevation: 3,
@@ -173,14 +192,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) =>
-                            ExerciseDetailScreen(
-                            exercise: exercise,
-                            index: index,
-                            ),
+                        builder: (_) => ExerciseDetailScreen(
+                          exercise: exercise, // ✅ dùng được ở đây
+                          index: index,       // ✅ dùng được ở đây
+                        ),
                       ),
                     );
-
+                    // 🔥 QUAN TRỌNG NHẤT
+                    await loadProgress(); // ✅ ADD THIS LINE
                     // 🔥 QUAN TRỌNG: reload lại warmup
                     await loadWarmupStatus();
                   },

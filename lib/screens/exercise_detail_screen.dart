@@ -152,13 +152,8 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
   }
 
   void loadProgress() async {
-    final done = await ProgressService.isDone(widget.exercise.title);
+    final done = await ProgressService.isDone("step_${widget.index}");
     setState(() => isDone = done);
-  }
-
-  void markDone() async {
-    await ProgressService.markDone(widget.exercise.title);
-    setState(() => isDone = true);
   }
 
   @override
@@ -243,14 +238,20 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
 
               ElevatedButton(
                 onPressed: (currentSeconds >= requiredSeconds && !isDone)
-                    ? markDone
+                    ? () async {
+                        // 🔥 SAVE STEP (QUAN TRỌNG NHẤT)
+                        await ProgressService.markDone("step_${widget.index}");
+
+                        print("🔥 DONE step_${widget.index}");
+
+                        // 🔥 QUAY VỀ HOME
+                        Navigator.pop(context);
+                      }
                     : null,
                 child: Text(
                   currentSeconds < requiredSeconds
                       ? "Train at least ${requiredSeconds} seconds"
-                      : (isDone
-                          ? "Completed ✅"
-                          : "Mark as Done"),
+                      : (isDone ? "Completed ✅" : "Mark as Done"),
                 ),
               ),
             ],
