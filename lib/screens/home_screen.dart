@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../data/firestore_service.dart';
 import '../models/exercise.dart';
 import 'exercise_detail_screen.dart';
 import 'about_screen.dart';
@@ -21,22 +20,17 @@ class _HomeScreenState extends State<HomeScreen> {
   Timer? _timer;
   bool isSubscribed = false;
 
-  // 🔥 ADD THIS
   bool isWarmupValid = false;
-  // 🔥 ADD THIS LINE (NGAY TẠI ĐÂY)
   Set<String> completedSteps = {};
 
   @override
   void initState() {
     super.initState();
 
-    print("🔥 initState called");
-
     loadSubscription();
-    loadWarmupStatus(); // 🔥 ADD THIS
-    loadProgress(); // 🔥 ADD THIS
+    loadWarmupStatus();
+    loadProgress();
 
-      // 🔥 AUTO CHECK mỗi 10s (test), production 60s
     _timer = Timer.periodic(const Duration(seconds: 10), (_) {
       loadWarmupStatus();
     });
@@ -51,7 +45,6 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  // 🔥 ADD THIS FUNCTION
   Future<void> loadWarmupStatus() async {
     final valid = await ProgressService.isWarmupValid();
 
@@ -59,14 +52,15 @@ class _HomeScreenState extends State<HomeScreen> {
       isWarmupValid = valid;
     });
   }
-  // 🔥 ADD THIS FUNCTION
+
   Future<void> loadProgress() async {
     final list = await ProgressService.getCompleted();
+
     setState(() {
       completedSteps = list.toSet();
     });
-    print("🔥 completedSteps AFTER setState: $completedSteps"); // 🔥 ADD
 
+    print("🔥 completedSteps: $completedSteps");
   }
 
   @override
@@ -102,9 +96,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   builder: (context) => const SubscriptionPage(),
                 ),
               );
-              // 🔥 ADD THIS
-              await loadProgress();
 
+              await loadProgress();
               loadSubscription();
             },
           )
@@ -136,76 +129,122 @@ class _HomeScreenState extends State<HomeScreen> {
 
           exercises.sort((a, b) => a.order.compareTo(b.order));
 
-          return ListView.builder(
-            padding: const EdgeInsets.only(bottom: 16),
-            itemCount: exercises.length,
+          // 🔥 PROGRESS CALCULATION (ĐÚNG CHỖ)
+          final totalSteps = exercises.length;
+          final doneSteps = completedSteps.length;
+          final progress =
+              totalSteps == 0 ? 0.0 : doneSteps / totalSteps;
 
-            itemBuilder: (context, index) {
-              final exercise = exercises[index];
+          return Column(
+            children: [
 
-              final isLocked =
-                  index > 0 &&
-                  (
-                    !isWarmupValid || // 🔥 chưa warmup
-                    !completedSteps.contains("step_${index - 1}") // 🔥 chưa pass step trước
-                  );
-
-              return Card(
-                elevation: 3,
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.all(16),
-
-                  title: Text(
-                    "Step ${index + 1}: ${exercise.title}",
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+              // 🔥 PROGRESS BAR UI
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Progress: $doneSteps / $totalSteps",
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 8),
 
-                  subtitle: Text(
-                    isLocked
-                        ? "🔒 Please complete Warm Up first"
-                        : (exercise.description.isEmpty
-                            ? "Tap to access exercise details"
-                            : exercise.description),
-                  ),
+                    LinearProgressIndicator(
+                      value: progress,
+                      minHeight: 8,
+                      backgroundColor: Colors.grey[300],
+                      valueColor:
+                          const AlwaysStoppedAnimation(Colors.green),
+                    ),
+                  ],
+                ),
+              ),
 
-                  trailing: Icon(
-                    isLocked ? Icons.lock : Icons.arrow_forward_ios,
-                  ),
+              // 🔥 LIST STEP
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  itemCount: exercises.length,
+                  itemBuilder: (context, index) {
+                    final exercise = exercises[index];
 
-                  onTap: () async {
-                    if (isLocked) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Please warm up first"),
+                    final isLocked =
+                        index > 0 &&
+                        (
+                          !isWarmupValid ||
+                          !completedSteps
+                              .contains("step_${index - 1}")
+                        );
+
+                    return Card(
+                      elevation: 3,
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.all(16),
+
+                        title: Text(
+                          "Step ${index + 1}: ${exercise.title}",
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
-                      );
-                      return;
-                    }
 
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ExerciseDetailScreen(
-                          exercise: exercise, // ✅ dùng được ở đây
-                          index: index,       // ✅ dùng được ở đây
+                        subtitle: Text(
+                          isLocked
+                              ? "🔒 Please complete Warm Up first"
+                              : (exercise.description.isEmpty
+                                  ? "Tap to access exercise details"
+                                  : exercise.description),
                         ),
+
+                        trailing: Icon(
+                          isLocked
+                              ? Icons.lock
+                              : Icons.arrow_forward_ios,
+                        ),
+
+                        onTap: () async {
+                          if (isLocked) {
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                    "Please complete previous step"),
+                              ),
+                            );
+                            return;
+                          }
+
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  ExerciseDetailScreen(
+                                exercise: exercise,
+                                index: index,
+                              ),
+                            ),
+                          );
+
+                          // 🔥 reload progress
+                          await loadProgress();
+                          await loadWarmupStatus();
+                        },
                       ),
                     );
-                    // 🔥 QUAN TRỌNG NHẤT
-                    await loadProgress(); // ✅ ADD THIS LINE
-                    // 🔥 QUAN TRỌNG: reload lại warmup
-                    await loadWarmupStatus();
                   },
                 ),
-              );
-            },
+              ),
+            ],
           );
         },
       ),
