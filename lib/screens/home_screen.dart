@@ -174,7 +174,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (_) =>
-                            ExerciseDetailScreen(exercise: exercise),
+                            ExerciseDetailScreen(
+                            exercise: exercise,
+                            index: index,
+                            ),
                       ),
                     );
 

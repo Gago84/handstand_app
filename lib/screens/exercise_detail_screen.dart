@@ -9,7 +9,8 @@ import '../services/progress_service.dart';
 
 class ExerciseDetailScreen extends StatefulWidget {
   final Exercise exercise;
-  const ExerciseDetailScreen({super.key, required this.exercise});
+  final int index; // 🔥 ADD THIS
+  const ExerciseDetailScreen({super.key, required this.exercise, required this.index});
 
   @override
   State<ExerciseDetailScreen> createState() =>
@@ -101,7 +102,15 @@ class _TimerWidgetState extends State<TimerWidget> {
 // ================= SCREEN =================
 class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
     // 🔥 ADD HERE (NGAY DƯỚI CLASS)
-  static const int requiredSeconds = 5; // test 5 seconds
+  int getRequiredSeconds(int index) {
+    switch (index) {
+      case 0: return 5;     // warmup (test)
+      case 1: return 15;    // step 2 (test)
+      case 2: return 20;
+      case 3: return 25;
+      default: return 10;
+      }
+  }
   late YoutubePlayerController _controller;
   late String _currentVideoId;
 
@@ -111,10 +120,15 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
 
   // 🔥 ADD THIS (tránh save nhiều lần)
   bool warmupSaved = false;
+    // 🔥 ADD THIS LINE (CHÍNH XÁC Ở ĐÂY)
+  late int requiredSeconds;
 
   @override
   void initState() {
     super.initState();
+
+    // 🔥 ADD THIS LINE
+    requiredSeconds = getRequiredSeconds(widget.index);
 
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
