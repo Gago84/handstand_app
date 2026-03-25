@@ -210,7 +210,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                       widget.exercise.title.toLowerCase().contains("warm") &&
                       sec >= requiredSeconds) {
                     warmupSaved = true;
-                    await ProgressService.markDone("warmup_done");
+                    await ProgressService.saveWarmupTime();
 
                     print("🔥 Warmup DONE saved!");
                   }

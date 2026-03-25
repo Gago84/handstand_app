@@ -7,9 +7,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../widgets/banner_ad_widget.dart';
 import 'subscription_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-// 🔥 ADD THIS
 import '../services/progress_service.dart';
+import 'dart:async';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,10 +18,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  Timer? _timer;
   bool isSubscribed = false;
 
   // 🔥 ADD THIS
-  bool warmupDone = false;
+  bool isWarmupValid = false;
 
   @override
   void initState() {
@@ -32,6 +32,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
     loadSubscription();
     loadWarmupStatus(); // 🔥 ADD THIS
+      // 🔥 AUTO CHECK mỗi 10s (test), production 60s
+    _timer = Timer.periodic(const Duration(seconds: 10), (_) {
+      loadWarmupStatus();
+    });
   }
 
   Future<void> loadSubscription() async {
@@ -45,10 +49,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // 🔥 ADD THIS FUNCTION
   Future<void> loadWarmupStatus() async {
-    final done = await ProgressService.isDone("warmup_done");
+    final valid = await ProgressService.isWarmupValid();
+
     setState(() {
-      warmupDone = done;
+      isWarmupValid = valid;
     });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -113,24 +124,19 @@ class _HomeScreenState extends State<HomeScreen> {
           return ListView.builder(
             padding: const EdgeInsets.only(bottom: 16),
             itemCount: exercises.length,
+
             itemBuilder: (context, index) {
               final exercise = exercises[index];
 
               // 🔥 LOCK LOGIC
-              final isLocked = !warmupDone && index != 0;
+              final isLocked = index > 0 && !isWarmupValid;
 
               return Card(
                 elevation: 3,
-                margin: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 8),
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
-
-                color: isLocked
-                    ? Colors.grey[300] // 🔥 màu lock
-                    : Colors.white,
-
                 child: ListTile(
                   contentPadding: const EdgeInsets.all(16),
 
@@ -144,24 +150,26 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   subtitle: Text(
                     isLocked
-                        ? "Complete Warm Up first 🔒"
+                        ? "🔒 Please complete Warm Up first"
                         : (exercise.description.isEmpty
-                            ? "Tap to view video"
+                            ? "Tap to access exercise details"
                             : exercise.description),
-                    style: TextStyle(
-                      color: isLocked ? Colors.red : null,
-                    ),
                   ),
 
                   trailing: Icon(
-                    isLocked
-                        ? Icons.lock
-                        : Icons.arrow_forward_ios,
+                    isLocked ? Icons.lock : Icons.arrow_forward_ios,
                   ),
 
-            onTap: isLocked
-                ? null
-                : () async {
+                  onTap: () async {
+                    if (isLocked) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Please warm up first"),
+                        ),
+                      );
+                      return;
+                    }
+
                     await Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -170,8 +178,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     );
 
-                    // 🔥 QUAN TRỌNG: reload lại
-                    loadWarmupStatus();
+                    // 🔥 QUAN TRỌNG: reload lại warmup
+                    await loadWarmupStatus();
                   },
                 ),
               );

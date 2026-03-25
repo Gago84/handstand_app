@@ -22,4 +22,24 @@ class ProgressService {
     final list = await getCompleted();
     return list.contains(id);
   }
+  static const String warmupTimeKey = "warmup_time";
+
+  static Future<void> saveWarmupTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await prefs.setInt(warmupTimeKey, now);
+  }
+  static Future<bool> isWarmupValid() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getInt(warmupTimeKey);
+
+    if (saved == null) return false;
+
+    final savedTime = DateTime.fromMillisecondsSinceEpoch(saved);
+    final now = DateTime.now();
+
+    final diff = now.difference(savedTime);
+
+    return diff.inSeconds < 10; // 🔥 10 second in test, 3h in production
+  }
 }
