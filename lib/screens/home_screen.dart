@@ -172,74 +172,72 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemBuilder: (context, index) {
                     final exercise = exercises[index];
 
+                    final prevStepGood =
+                        completedSteps.contains("step_${index - 1}");
+
                     final isLocked =
-                        index > 0 &&
-                        (
-                          !isWarmupValid ||
-                          !completedSteps
-                              .contains("step_${index - 1}")
-                        );
+                        index > 0 && (!isWarmupValid || !prevStepGood);
 
-                    return Card(
-                      elevation: 3,
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.all(16),
+                    return FutureBuilder<Map<String, int>>(
+                      future: ProgressService.getFeedback(index),
+                      builder: (context, snapshot) {
+                        final good = snapshot.data?["good"] ?? 0;
+                        final bad = snapshot.data?["bad"] ?? 0;
 
-                        title: Text(
-                          "Step ${index + 1}: ${exercise.title}",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                        return Card(
+                          elevation: 3,
+                          margin:
+                              const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                        ),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.all(16),
 
-                        subtitle: Text(
-                          isLocked
-                              ? "🔒 Please complete Warm Up first"
-                              : (exercise.description.isEmpty
-                                  ? "Tap to access exercise details"
-                                  : exercise.description),
-                        ),
-
-                        trailing: Icon(
-                          isLocked
-                              ? Icons.lock
-                              : Icons.arrow_forward_ios,
-                        ),
-
-                        onTap: () async {
-                          if (isLocked) {
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    "Please complete previous step"),
-                              ),
-                            );
-                            return;
-                          }
-
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  ExerciseDetailScreen(
-                                exercise: exercise,
-                                index: index,
+                            title: Text(
+                              "Step ${index + 1}: ${exercise.title}",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
                               ),
                             ),
-                          );
 
-                          // 🔥 reload progress
-                          await loadProgress();
-                          await loadWarmupStatus();
-                        },
-                      ),
+                            subtitle: Text(
+                              isLocked
+                                  ? "🔒 Complete previous step"
+                                  : "👍 Good: $good   😓 Practice: $bad",
+                            ),
+
+                            trailing: Icon(
+                              isLocked ? Icons.lock : Icons.arrow_forward_ios,
+                            ),
+
+                            onTap: () async {
+                              if (isLocked) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text("Please complete previous step"),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ExerciseDetailScreen(
+                                    exercise: exercise,
+                                    index: index,
+                                  ),
+                                ),
+                              );
+
+                              await loadProgress();
+                              await loadWarmupStatus();
+                            },
+                          ),
+                        );
+                      },
                     );
                   },
                 ),

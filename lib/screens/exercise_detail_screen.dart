@@ -234,14 +234,14 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                 children: [
                   ElevatedButton(
                     onPressed: () async {
-                      await ProgressService.saveFeedback(widget.index, "good");
+                      await ProgressService.saveFeedback(widget.index, true);
                     },
-                    child: const Text("👍 Stable"),
+                    child: const Text("👍 Good"),
                   ),
                   const SizedBox(width: 10),
                   ElevatedButton(
                     onPressed: () async {
-                      await ProgressService.saveFeedback(widget.index, "bad");
+                      await ProgressService.saveFeedback(widget.index, false);
                     },
                     child: const Text("😓 Need Practice"),
                   ),

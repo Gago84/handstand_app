@@ -46,8 +46,30 @@ class ProgressService {
 
     return diff.inSeconds < 10; // 🔥 10 second in test, 3h in production
   }
-  static Future<void> saveFeedback(int index, String value) async {
+  
+  // 🔥 SAVE FEEDBACK COUNT
+  static Future<void> saveFeedback(int index, bool isGood) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString("feedback_$index", value);
+
+    final goodKey = "step_${index}_good";
+    final badKey = "step_${index}_bad";
+
+    if (isGood) {
+      final current = prefs.getInt(goodKey) ?? 0;
+      await prefs.setInt(goodKey, current + 1);
+    } else {
+      final current = prefs.getInt(badKey) ?? 0;
+      await prefs.setInt(badKey, current + 1);
+    }
+  }
+
+  // 🔥 GET FEEDBACK
+  static Future<Map<String, int>> getFeedback(int index) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    return {
+      "good": prefs.getInt("step_${index}_good") ?? 0,
+      "bad": prefs.getInt("step_${index}_bad") ?? 0,
+    };
   }
 }
