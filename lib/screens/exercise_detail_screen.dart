@@ -225,13 +225,34 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                   }
                 },
               ),
+              const SizedBox(height: 16),
 
+              Text("How do you feel?"),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: () async {
+                      await ProgressService.saveFeedback(widget.index, "good");
+                    },
+                    child: const Text("👍 Stable"),
+                  ),
+                  const SizedBox(width: 10),
+                  ElevatedButton(
+                    onPressed: () async {
+                      await ProgressService.saveFeedback(widget.index, "bad");
+                    },
+                    child: const Text("😓 Need Practice"),
+                  ),
+                ],
+              ),
               const SizedBox(height: 10),
 
               Text(
                 currentSeconds < requiredSeconds
                     ? "Remaining: ${requiredSeconds - currentSeconds}s"
-                    : "You can complete now!",
+                    : "Great job! You can mark this step as completed.",
               ),
 
               const SizedBox(height: 10),

@@ -46,4 +46,8 @@ class ProgressService {
 
     return diff.inSeconds < 10; // 🔥 10 second in test, 3h in production
   }
+  static Future<void> saveFeedback(int index, String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("feedback_$index", value);
+  }
 }
