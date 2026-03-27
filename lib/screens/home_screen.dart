@@ -59,8 +59,6 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       completedSteps = list.toSet();
     });
-
-    print("🔥 completedSteps: $completedSteps");
   }
 
   @override
@@ -72,18 +70,28 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
+
       appBar: AppBar(
-        title: const Text("Handstand Free"),
+        backgroundColor: Colors.black,
+        elevation: 0,
+        title: const Text("Handstand Training",
+            style: TextStyle(      
+              color: Colors.white, // 🔥 FIX HERE
+              fontWeight: FontWeight.bold,
+              fontSize: 20,)
+        ),
         centerTitle: true,
+        iconTheme: const IconThemeData(
+          color: Colors.white, // 🔥 icons also white
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.info_outline),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => const AboutScreen(),
-                ),
+                MaterialPageRoute(builder: (_) => const AboutScreen()),
               );
             },
           ),
@@ -93,10 +101,8 @@ class _HomeScreenState extends State<HomeScreen> {
               await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const SubscriptionPage(),
-                ),
+                    builder: (context) => const SubscriptionPage()),
               );
-
               await loadProgress();
               loadSubscription();
             },
@@ -129,7 +135,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
           exercises.sort((a, b) => a.order.compareTo(b.order));
 
-          // 🔥 PROGRESS CALCULATION (ĐÚNG CHỖ)
           final totalSteps = exercises.length;
           final doneSteps = completedSteps.length;
           final progress =
@@ -138,36 +143,51 @@ class _HomeScreenState extends State<HomeScreen> {
           return Column(
             children: [
 
-              // 🔥 PROGRESS BAR UI
-              Padding(
-                padding: const EdgeInsets.all(16),
+              // 🔥 HEADER (GRADIENT + PROGRESS)
+              Container(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Color(0xFF0F2027),
+                      Color(0xFF203A43),
+                      Color(0xFF2C5364),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Progress: $doneSteps / $totalSteps",
+                      "$doneSteps / $totalSteps completed",
                       style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                        color: Colors.white70,
+                        fontSize: 14,
                       ),
                     ),
-                    const SizedBox(height: 8),
-
-                    LinearProgressIndicator(
-                      value: progress,
-                      minHeight: 8,
-                      backgroundColor: Colors.grey[300],
-                      valueColor:
-                          const AlwaysStoppedAnimation(Colors.green),
+                    const SizedBox(height: 12),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 10,
+                        backgroundColor: Colors.white24,
+                        valueColor: const AlwaysStoppedAnimation(
+                          Color(0xFF00E676),
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
 
-              // 🔥 LIST STEP
+              // 🔥 LIST
               Expanded(
                 child: ListView.builder(
-                  padding: const EdgeInsets.only(bottom: 16),
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.only(top: 10, bottom: 16),
                   itemCount: exercises.length,
                   itemBuilder: (context, index) {
                     final exercise = exercises[index];
@@ -184,57 +204,103 @@ class _HomeScreenState extends State<HomeScreen> {
                         final good = snapshot.data?["good"] ?? 0;
                         final bad = snapshot.data?["bad"] ?? 0;
 
-                        return Card(
-                          elevation: 3,
-                          margin:
-                              const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.all(16),
-
-                            title: Text(
-                              "Step ${index + 1}: ${exercise.title}",
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-
-                            subtitle: Text(
-                              isLocked
-                                  ? "🔒 Complete previous step"
-                                  : "👍 Good: $good   😓 Practice: $bad",
-                            ),
-
-                            trailing: Icon(
-                              isLocked ? Icons.lock : Icons.arrow_forward_ios,
-                            ),
-
-                            onTap: () async {
-                              if (isLocked) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text("Please complete previous step"),
-                                  ),
-                                );
-                                return;
-                              }
-
-                              await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ExerciseDetailScreen(
-                                    exercise: exercise,
-                                    index: index,
-                                  ),
+                        return GestureDetector(
+                          onTap: () async {
+                            if (isLocked) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content:
+                                      Text("Please complete previous step"),
                                 ),
                               );
+                              return;
+                            }
 
-                              await loadProgress();
-                              await loadWarmupStatus();
-                            },
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ExerciseDetailScreen(
+                                  exercise: exercise,
+                                  index: index,
+                                ),
+                              ),
+                            );
+
+                            await loadProgress();
+                            await loadWarmupStatus();
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF1E1E1E),
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: Row(
+                              children: [
+
+                                // 🔥 STEP CIRCLE
+                                Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: isLocked
+                                        ? Colors.grey
+                                        : const Color(0xFF00E676),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      "${index + 1}",
+                                      style: const TextStyle(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                const SizedBox(width: 14),
+
+                                // 🔥 TEXT
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        exercise.title,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        isLocked
+                                            ? "Locked"
+                                            : "👍 $good   😓 $bad",
+                                        style: const TextStyle(
+                                          color: Colors.white54,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                Icon(
+                                  isLocked
+                                      ? Icons.lock
+                                      : Icons.play_arrow,
+                                  color: Colors.white70,
+                                  size: 18,
+                                ),
+                              ],
+                            ),
                           ),
                         );
                       },
