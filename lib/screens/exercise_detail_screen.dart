@@ -3,14 +3,17 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import '../models/exercise.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
-
-// 🔥 IMPORT
 import '../services/progress_service.dart';
 
 class ExerciseDetailScreen extends StatefulWidget {
   final Exercise exercise;
-  final int index; // 🔥 ADD THIS
-  const ExerciseDetailScreen({super.key, required this.exercise, required this.index});
+  final int index;
+
+  const ExerciseDetailScreen({
+    super.key,
+    required this.exercise,
+    required this.index,
+  });
 
   @override
   State<ExerciseDetailScreen> createState() =>
@@ -101,39 +104,41 @@ class _TimerWidgetState extends State<TimerWidget> {
 
 // ================= SCREEN =================
 class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
-    // 🔥 ADD HERE (NGAY DƯỚI CLASS)
+  // 🔥 FULLSCREEN STATE
+  bool isFullScreen = false;
+
+  // 🔥 STEP TIME CONFIG
   int getRequiredSeconds(int index) {
     switch (index) {
-      case 0: return 5;     // warmup (test)
-      case 1: return 15;    // step 2 (test)
-      case 2: return 20;
-      case 3: return 25;
-      default: return 10;
-      }
+      case 0:
+        return 5;
+      case 1:
+        return 15;
+      case 2:
+        return 20;
+      case 3:
+        return 25;
+      default:
+        return 10;
+    }
   }
+
   late YoutubePlayerController _controller;
   late String _currentVideoId;
 
   bool isDone = false;
-
   int currentSeconds = 0;
-
-  // 🔥 ADD THIS (tránh save nhiều lần)
   bool warmupSaved = false;
-    // 🔥 ADD THIS LINE (CHÍNH XÁC Ở ĐÂY)
   late int requiredSeconds;
 
   @override
   void initState() {
     super.initState();
 
-    // 🔥 ADD THIS LINE
     requiredSeconds = getRequiredSeconds(widget.index);
 
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
     ]);
 
     _currentVideoId = widget.exercise.videoPortrait.isNotEmpty
@@ -145,6 +150,8 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
       flags: const YoutubePlayerFlags(
         autoPlay: false,
         mute: false,
+        hideControls: false,
+        controlsVisibleAtStart: true,
       ),
     );
 
@@ -152,133 +159,181 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
   }
 
   void loadProgress() async {
-    final done = await ProgressService.isDone("step_${widget.index}");
+    final done =
+        await ProgressService.isDone("step_${widget.index}");
     setState(() => isDone = done);
   }
 
   @override
   void dispose() {
     _controller.dispose();
-
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]);
-
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final isPortrait =
-        MediaQuery.of(context).orientation == Orientation.portrait;
-
     return Scaffold(
-      appBar: isPortrait
-          ? AppBar(title: Text(widget.exercise.title))
-          : null,
+      appBar: isFullScreen
+          ? null
+          : AppBar(title: Text(widget.exercise.title)),
 
       body: Column(
         children: [
-          Expanded(
-            child: YoutubePlayer(
-              controller: _controller,
-              showVideoProgressIndicator: true,
-            ),
-          ),
-          const SizedBox(height: 10),
-          const Text(
-            "Track your training time and mark your progress",
-          ),
-          const SizedBox(height: 10),
-        ],
-      ),
 
-      bottomNavigationBar: SafeArea(
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-              )
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TimerWidget(
-                onTimeUpdate: (sec) async {
-                  setState(() {
-                    currentSeconds = sec;
-                  });
-
-                  // 🔥 ADD THIS BLOCK (QUAN TRỌNG NHẤT)
-                  if (!warmupSaved &&
-                      widget.exercise.title.toLowerCase().contains("warm") &&
-                      sec >= requiredSeconds) {
-                    warmupSaved = true;
-                    await ProgressService.saveWarmupTime();
-
-                    print("🔥 Warmup DONE saved!");
-                  }
-                },
-              ),
-              const SizedBox(height: 16),
-
-              Text("How do you feel?"),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+          // 🎥 VIDEO + GESTURE
+          GestureDetector(
+            onVerticalDragEnd: (details) {
+              if (details.velocity.pixelsPerSecond.dy < -300) {
+                setState(() => isFullScreen = true);
+              }
+              if (details.velocity.pixelsPerSecond.dy > 300) {
+                setState(() => isFullScreen = false);
+              }
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOutCubic,
+              height: isFullScreen
+                  ? MediaQuery.of(context).size.height
+                  : MediaQuery.of(context).size.height * 0.45,
+              child: Stack(
                 children: [
-                  ElevatedButton(
-                    onPressed: () async {
-                      await ProgressService.saveFeedback(widget.index, true);
-                    },
-                    child: const Text("👍 Good"),
+                  YoutubePlayer(
+                    controller: _controller,
+                    showVideoProgressIndicator: true,
+                    bottomActions: const [], // 🔥 REMOVE FULLSCREEN BUTTON
+
                   ),
-                  const SizedBox(width: 10),
-                  ElevatedButton(
-                    onPressed: () async {
-                      await ProgressService.saveFeedback(widget.index, false);
-                    },
-                    child: const Text("😓 Need Practice"),
+
+                  // 🔥 FULLSCREEN BUTTON
+                  Positioned(
+                    right: 10,
+                    bottom: 10,
+                    child: IconButton(
+                      icon: Icon(
+                        isFullScreen
+                            ? Icons.fullscreen_exit
+                            : Icons.fullscreen,
+                        color: Colors.white,
+                        size: 30,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          isFullScreen = !isFullScreen;
+                        });
+                      },
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+            ),
+          ),
 
-              Text(
-                currentSeconds < requiredSeconds
-                    ? "Remaining: ${requiredSeconds - currentSeconds}s"
-                    : "Great job! You can mark this step as completed.",
-              ),
+          // 🔥 HIDE WHEN FULLSCREEN
+          if (!isFullScreen) ...[
+            const SizedBox(height: 10),
+            const Text(
+              "Track your training time and mark your progress",
+            ),
+            const SizedBox(height: 10),
+          ],
+        ],
+      ),
 
-              const SizedBox(height: 10),
+      // 🔥 HIDE BOTTOM WHEN FULLSCREEN
+      bottomNavigationBar: isFullScreen
+          ? null
+          : SafeArea(
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                    )
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TimerWidget(
+                      onTimeUpdate: (sec) async {
+                        setState(() {
+                          currentSeconds = sec;
+                        });
 
-              ElevatedButton(
-                onPressed: (currentSeconds >= requiredSeconds && !isDone)
-                    ? () async {
-                        // 🔥 SAVE STEP (QUAN TRỌNG NHẤT)
-                        await ProgressService.markDone("step_${widget.index}");
+                        if (!warmupSaved &&
+                            widget.exercise.title
+                                .toLowerCase()
+                                .contains("warm") &&
+                            sec >= requiredSeconds) {
+                          warmupSaved = true;
+                          await ProgressService.saveWarmupTime();
+                        }
+                      },
+                    ),
 
-                        print("🔥 DONE step_${widget.index}");
+                    const SizedBox(height: 16),
 
-                        // 🔥 QUAY VỀ HOME
-                        Navigator.pop(context);
-                      }
-                    : null,
-                child: Text(
-                  currentSeconds < requiredSeconds
-                      ? "Train at least ${requiredSeconds} seconds"
-                      : (isDone ? "Completed ✅" : "Mark as Done"),
+                    const Text("How was this step?"),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () async {
+                            await ProgressService.saveFeedback(
+                                widget.index, true);
+                          },
+                          child: const Text("👍 Good"),
+                        ),
+                        const SizedBox(width: 10),
+                        ElevatedButton(
+                          onPressed: () async {
+                            await ProgressService.saveFeedback(
+                                widget.index, false);
+                          },
+                          child: const Text("😓 Need Practice"),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    Text(
+                      currentSeconds < requiredSeconds
+                          ? "Remaining: ${requiredSeconds - currentSeconds}s"
+                          : "Great job! You can mark this step as completed.",
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    ElevatedButton(
+                      onPressed:
+                          (currentSeconds >= requiredSeconds && !isDone)
+                              ? () async {
+                                  await ProgressService.markDone(
+                                      "step_${widget.index}");
+                                  Navigator.pop(context);
+                                }
+                              : null,
+                      child: Text(
+                        currentSeconds < requiredSeconds
+                            ? "Train at least $requiredSeconds seconds"
+                            : (isDone
+                                ? "Completed ✅"
+                                : "Mark as Done"),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }
