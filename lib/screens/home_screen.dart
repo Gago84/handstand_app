@@ -31,9 +31,15 @@ class _HomeScreenState extends State<HomeScreen> {
     loadWarmupStatus();
     loadProgress();
 
-    _timer = Timer.periodic(const Duration(seconds: 10), (_) {
-      loadWarmupStatus();
+_timer = Timer.periodic(const Duration(seconds: 1), (_) async {
+  final valid = await ProgressService.isWarmupValid();
+
+  if (valid != isWarmupValid) {
+    setState(() {
+      isWarmupValid = valid;
     });
+  }
+});
   }
 
   Future<void> loadSubscription() async {
