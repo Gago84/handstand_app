@@ -217,18 +217,12 @@ Widget _segment(String text, bool isGood) {
   final isSelected = isGoodSelected == isGood;
 
   return GestureDetector(
-    onTap: () async {
+    onTap: () {
       HapticFeedback.lightImpact();
 
       setState(() {
-        isGoodSelected = isGood; // vẫn cho đổi UI
+        isGoodSelected = isGood; // ✅ chỉ update UI
       });
-
-      // ✅ chỉ save 1 lần
-      if (!hasSavedFeedback) {
-        hasSavedFeedback = true;
-        await ProgressService.saveFeedback(widget.index, isGood);
-      }
     },
     child: AnimatedScale(
       scale: isSelected ? 1.05 : 1,
@@ -379,15 +373,23 @@ alignment: const Alignment(0, -0.5),
                         const SizedBox(height: 12),
 
                         GestureDetector(
-                          onTap: (currentSeconds >= requiredSeconds &&
-                                  !isDone)
-                              ? () async {
-                                  HapticFeedback.mediumImpact();
-                                  await ProgressService.markDone(
-                                      "step_${widget.index}");
-                                  Navigator.pop(context);
-                                }
-                              : null,
+onTap: (currentSeconds >= requiredSeconds &&
+        !isDone &&
+        isGoodSelected != null)
+    ? () async {
+        HapticFeedback.mediumImpact();
+
+        // ✅ SAVE feedback tại đây (1 lần duy nhất)
+        if (isGoodSelected != null) {
+          await ProgressService.saveFeedback(
+              widget.index, isGoodSelected!);
+        }
+
+        await ProgressService.markDone("step_${widget.index}");
+
+        Navigator.pop(context);
+      }
+    : null,
                           child: Container(
                             width: double.infinity,
                             padding:
