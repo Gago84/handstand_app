@@ -3,6 +3,7 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import '../models/exercise.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
+import 'dart:ui';
 import '../services/progress_service.dart';
 
 class ExerciseDetailScreen extends StatefulWidget {
@@ -35,6 +36,7 @@ class _TimerWidgetState extends State<TimerWidget> {
   bool isRunning = false;
 
   void startTimer() {
+    HapticFeedback.lightImpact();
     timer = Timer.periodic(const Duration(seconds: 1), (t) {
       setState(() => seconds++);
       widget.onTimeUpdate?.call(seconds);
@@ -43,11 +45,13 @@ class _TimerWidgetState extends State<TimerWidget> {
   }
 
   void pauseTimer() {
+    HapticFeedback.lightImpact();
     timer?.cancel();
     setState(() => isRunning = false);
   }
 
   void resetTimer() {
+    HapticFeedback.lightImpact();
     timer?.cancel();
     setState(() {
       seconds = 0;
@@ -60,6 +64,31 @@ class _TimerWidgetState extends State<TimerWidget> {
     final m = (sec ~/ 60).toString().padLeft(2, '0');
     final s = (sec % 60).toString().padLeft(2, '0');
     return "$m:$s";
+  }
+
+  Widget _pillButton(String text, VoidCallback? onTap,
+      {bool isSecondary = false}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 200),
+        opacity: onTap == null ? 0.4 : 1,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          decoration: BoxDecoration(
+            color: isSecondary ? Colors.grey[200] : Colors.black,
+            borderRadius: BorderRadius.circular(25),
+          ),
+          child: Text(
+            text,
+            style: TextStyle(
+              color: isSecondary ? Colors.black : Colors.white,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -75,26 +104,18 @@ class _TimerWidgetState extends State<TimerWidget> {
         Text(
           formatTime(seconds),
           style: const TextStyle(
-              fontSize: 32, fontWeight: FontWeight.bold),
+            fontSize: 44,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 1.5,
+          ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            ElevatedButton(
-              onPressed: isRunning ? null : startTimer,
-              child: const Text("Start"),
-            ),
-            const SizedBox(width: 8),
-            ElevatedButton(
-              onPressed: isRunning ? pauseTimer : null,
-              child: const Text("Pause"),
-            ),
-            const SizedBox(width: 8),
-            ElevatedButton(
-              onPressed: resetTimer,
-              child: const Text("Reset"),
-            ),
+            _pillButton("Start", isRunning ? null : startTimer),
+            _pillButton("Pause", isRunning ? pauseTimer : null),
+            _pillButton("Reset", resetTimer, isSecondary: true),
           ],
         ),
       ],
@@ -105,6 +126,8 @@ class _TimerWidgetState extends State<TimerWidget> {
 // ================= SCREEN =================
 class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
   bool isFullScreen = false;
+  bool? isGoodSelected;
+  bool hasSavedFeedback = false; // 👈 quan trọng
 
   late YoutubePlayerController _controller;
   late String _currentVideoId;
@@ -114,7 +137,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
   bool warmupSaved = false;
   late int requiredSeconds;
 
-  bool _wasPlaying = false; // 🔥 detect play/pause
+  bool _wasPlaying = false;
 
   int getRequiredSeconds(int index) {
     switch (index) {
@@ -153,7 +176,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
         hideControls: false,
         controlsVisibleAtStart: true,
       ),
-    )..addListener(_videoListener); // 🔥 listener
+    )..addListener(_videoListener);
 
     loadProgress();
   }
@@ -163,13 +186,11 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
 
     final isPlaying = _controller.value.isPlaying;
 
-    // ▶️ PLAY → FULLSCREEN
     if (isPlaying && !_wasPlaying) {
       setState(() => isFullScreen = true);
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     }
 
-    // ⏸ PAUSE → EXIT FULLSCREEN
     if (!isPlaying && _wasPlaying) {
       setState(() => isFullScreen = false);
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -188,11 +209,57 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
   void dispose() {
     _controller.removeListener(_videoListener);
     _controller.dispose();
-
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-
     super.dispose();
   }
+
+Widget _segment(String text, bool isGood) {
+  final isSelected = isGoodSelected == isGood;
+
+  return GestureDetector(
+    onTap: () async {
+      HapticFeedback.lightImpact();
+
+      setState(() {
+        isGoodSelected = isGood; // vẫn cho đổi UI
+      });
+
+      // ✅ chỉ save 1 lần
+      if (!hasSavedFeedback) {
+        hasSavedFeedback = true;
+        await ProgressService.saveFeedback(widget.index, isGood);
+      }
+    },
+    child: AnimatedScale(
+      scale: isSelected ? 1.05 : 1,
+      duration: const Duration(milliseconds: 150),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.black : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 8,
+                  )
+                ]
+              : [],
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.black,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -204,38 +271,35 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // 🎥 VIDEO
-Expanded(
-  child: ClipRect(
-    child: SizedBox(
-      width: double.infinity,
-      child: FittedBox(
-        fit: BoxFit.cover,
-        alignment: Alignment.topCenter,
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.width * 16 / 9,
-          child: YoutubePlayer(
-            controller: _controller,
-            showVideoProgressIndicator: true,
-            bottomActions: const [],
-          ),
-        ),
-      ),
-    ),
-  ),
-),
-
-            // TEXT
+            Expanded(
+              child: ClipRect(
+                child: SizedBox(
+                  width: double.infinity,
+                  child: FittedBox(
+                    fit: BoxFit.cover,
+alignment: const Alignment(0, -0.5),
+                    child: SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      height:
+                          MediaQuery.of(context).size.width * 16 / 9,
+                      child: YoutubePlayer(
+                        controller: _controller,
+                        showVideoProgressIndicator: true,
+                        bottomActions: const [],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
             if (!isFullScreen)
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 2),
+                padding: const EdgeInsets.symmetric(vertical: 6),
                 child: Opacity(
                   opacity: 0.6,
                   child: Text(
                     "Track your training time and mark your progress",
-                    style: const TextStyle(fontSize: 11),
-                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 12),
                   ),
                 ),
               ),
@@ -243,86 +307,125 @@ Expanded(
         ),
       ),
 
-      // BOTTOM UI
+      // ================= APPLE STYLE BOTTOM =================
       bottomNavigationBar: isFullScreen
           ? null
           : SafeArea(
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                    )
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TimerWidget(
-                      onTimeUpdate: (sec) async {
-                        setState(() => currentSeconds = sec);
-
-                        if (!warmupSaved &&
-                            widget.exercise.title
-                                .toLowerCase()
-                                .contains("warm") &&
-                            sec >= requiredSeconds) {
-                          warmupSaved = true;
-                          await ProgressService.saveWarmupTime();
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 10),
-                    const Text("How was this step?"),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+              child: ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(28)),
+                child: BackdropFilter(
+                  filter:
+                      ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 14),
+                    color: Colors.white.withOpacity(0.7),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        ElevatedButton(
-                          onPressed: () async {
-                            await ProgressService.saveFeedback(
-                                widget.index, true);
+                        TimerWidget(
+                          onTimeUpdate: (sec) async {
+                            setState(() => currentSeconds = sec);
+
+                            if (!warmupSaved &&
+                                widget.exercise.title
+                                    .toLowerCase()
+                                    .contains("warm") &&
+                                sec >= requiredSeconds) {
+                              warmupSaved = true;
+                              await ProgressService
+                                  .saveWarmupTime();
+                            }
                           },
-                          child: const Text("👍 Good"),
                         ),
-                        const SizedBox(width: 10),
-                        ElevatedButton(
-                          onPressed: () async {
-                            await ProgressService.saveFeedback(
-                                widget.index, false);
-                          },
-                          child: const Text("😓 Need Practice"),
+                        const SizedBox(height: 16),
+
+                        const Text(
+                          "How was this step?",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w500),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      currentSeconds < requiredSeconds
-                          ? "Remaining: ${requiredSeconds - currentSeconds}s"
-                          : "Great job! You can mark this step as completed.",
-                    ),
-                    const SizedBox(height: 8),
-                    ElevatedButton(
-                      onPressed:
-                          (currentSeconds >= requiredSeconds && !isDone)
+
+                        const SizedBox(height: 8),
+
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius:
+                                BorderRadius.circular(25),
+                          ),
+                          child: Row(
+  mainAxisSize: MainAxisSize.min,
+  children: [
+    _segment("👍 Good", true),
+    const SizedBox(width: 4),
+    _segment("😓 Practice", false),
+  ],
+),
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        Text(
+                          currentSeconds < requiredSeconds
+                              ? "Keep going • ${requiredSeconds - currentSeconds}s left"
+                              : "Nice work 🎉",
+                          style: TextStyle(
+                              color: Colors.grey[600]),
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        GestureDetector(
+                          onTap: (currentSeconds >= requiredSeconds &&
+                                  !isDone)
                               ? () async {
+                                  HapticFeedback.mediumImpact();
                                   await ProgressService.markDone(
                                       "step_${widget.index}");
                                   Navigator.pop(context);
                                 }
                               : null,
-                      child: Text(
-                        currentSeconds < requiredSeconds
-                            ? "Train at least $requiredSeconds seconds"
-                            : (isDone
-                                ? "Completed ✅"
-                                : "Mark as Done"),
-                      ),
+                          child: Container(
+                            width: double.infinity,
+                            padding:
+                                const EdgeInsets.symmetric(
+                                    vertical: 14),
+                            decoration: BoxDecoration(
+                              color: (currentSeconds >=
+                                          requiredSeconds &&
+                                      !isDone)
+                                  ? Colors.black
+                                  : Colors.grey[300],
+                              borderRadius:
+                                  BorderRadius.circular(30),
+                            ),
+                            child: Center(
+                              child: Text(
+                                currentSeconds <
+                                        requiredSeconds
+                                    ? "Train at least $requiredSeconds seconds"
+                                    : (isDone
+                                        ? "Completed ✅"
+                                        : "Mark as Done"),
+                                style: TextStyle(
+                                  color: (currentSeconds >=
+                                              requiredSeconds &&
+                                          !isDone)
+                                      ? Colors.white
+                                      : Colors.black54,
+                                  fontWeight:
+                                      FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
