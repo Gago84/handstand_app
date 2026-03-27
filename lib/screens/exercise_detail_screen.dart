@@ -75,9 +75,9 @@ class _TimerWidgetState extends State<TimerWidget> {
         Text(
           formatTime(seconds),
           style: const TextStyle(
-              fontSize: 40, fontWeight: FontWeight.bold),
+              fontSize: 32, fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -85,12 +85,12 @@ class _TimerWidgetState extends State<TimerWidget> {
               onPressed: isRunning ? null : startTimer,
               child: const Text("Start"),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 8),
             ElevatedButton(
               onPressed: isRunning ? pauseTimer : null,
               child: const Text("Pause"),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 8),
             ElevatedButton(
               onPressed: resetTimer,
               child: const Text("Reset"),
@@ -104,10 +104,18 @@ class _TimerWidgetState extends State<TimerWidget> {
 
 // ================= SCREEN =================
 class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
-  // 🔥 FULLSCREEN STATE
   bool isFullScreen = false;
 
-  // 🔥 STEP TIME CONFIG
+  late YoutubePlayerController _controller;
+  late String _currentVideoId;
+
+  bool isDone = false;
+  int currentSeconds = 0;
+  bool warmupSaved = false;
+  late int requiredSeconds;
+
+  bool _wasPlaying = false; // 🔥 detect play/pause
+
   int getRequiredSeconds(int index) {
     switch (index) {
       case 0:
@@ -122,14 +130,6 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
         return 10;
     }
   }
-
-  late YoutubePlayerController _controller;
-  late String _currentVideoId;
-
-  bool isDone = false;
-  int currentSeconds = 0;
-  bool warmupSaved = false;
-  late int requiredSeconds;
 
   @override
   void initState() {
@@ -153,9 +153,29 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
         hideControls: false,
         controlsVisibleAtStart: true,
       ),
-    );
+    )..addListener(_videoListener); // 🔥 listener
 
     loadProgress();
+  }
+
+  void _videoListener() {
+    if (!_controller.value.isReady) return;
+
+    final isPlaying = _controller.value.isPlaying;
+
+    // ▶️ PLAY → FULLSCREEN
+    if (isPlaying && !_wasPlaying) {
+      setState(() => isFullScreen = true);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    }
+
+    // ⏸ PAUSE → EXIT FULLSCREEN
+    if (!isPlaying && _wasPlaying) {
+      setState(() => isFullScreen = false);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    }
+
+    _wasPlaying = isPlaying;
   }
 
   void loadProgress() async {
@@ -166,10 +186,11 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
 
   @override
   void dispose() {
+    _controller.removeListener(_videoListener);
     _controller.dispose();
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-    ]);
+
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
     super.dispose();
   }
 
@@ -180,75 +201,55 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
           ? null
           : AppBar(title: Text(widget.exercise.title)),
 
-      body: Column(
-        children: [
-
-          // 🎥 VIDEO + GESTURE
-          GestureDetector(
-            onVerticalDragEnd: (details) {
-              if (details.velocity.pixelsPerSecond.dy < -300) {
-                setState(() => isFullScreen = true);
-              }
-              if (details.velocity.pixelsPerSecond.dy > 300) {
-                setState(() => isFullScreen = false);
-              }
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOutCubic,
-              height: isFullScreen
-                  ? MediaQuery.of(context).size.height
-                  : MediaQuery.of(context).size.height * 0.45,
-              child: Stack(
-                children: [
-                  YoutubePlayer(
-                    controller: _controller,
-                    showVideoProgressIndicator: true,
-                    bottomActions: const [], // 🔥 REMOVE FULLSCREEN BUTTON
-
-                  ),
-
-                  // 🔥 FULLSCREEN BUTTON
-                  Positioned(
-                    right: 10,
-                    bottom: 10,
-                    child: IconButton(
-                      icon: Icon(
-                        isFullScreen
-                            ? Icons.fullscreen_exit
-                            : Icons.fullscreen,
-                        color: Colors.white,
-                        size: 30,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          isFullScreen = !isFullScreen;
-                        });
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // 🎥 VIDEO
+Expanded(
+  child: ClipRect(
+    child: SizedBox(
+      width: double.infinity,
+      child: FittedBox(
+        fit: BoxFit.cover,
+        alignment: Alignment.topCenter,
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.width * 16 / 9,
+          child: YoutubePlayer(
+            controller: _controller,
+            showVideoProgressIndicator: true,
+            bottomActions: const [],
           ),
+        ),
+      ),
+    ),
+  ),
+),
 
-          // 🔥 HIDE WHEN FULLSCREEN
-          if (!isFullScreen) ...[
-            const SizedBox(height: 10),
-            const Text(
-              "Track your training time and mark your progress",
-            ),
-            const SizedBox(height: 10),
+            // TEXT
+            if (!isFullScreen)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Opacity(
+                  opacity: 0.6,
+                  child: Text(
+                    "Track your training time and mark your progress",
+                    style: const TextStyle(fontSize: 11),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
           ],
-        ],
+        ),
       ),
 
-      // 🔥 HIDE BOTTOM WHEN FULLSCREEN
+      // BOTTOM UI
       bottomNavigationBar: isFullScreen
           ? null
           : SafeArea(
               child: Container(
-                padding: const EdgeInsets.all(12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   boxShadow: [
@@ -263,9 +264,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                   children: [
                     TimerWidget(
                       onTimeUpdate: (sec) async {
-                        setState(() {
-                          currentSeconds = sec;
-                        });
+                        setState(() => currentSeconds = sec);
 
                         if (!warmupSaved &&
                             widget.exercise.title
@@ -277,11 +276,8 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                         }
                       },
                     ),
-
-                    const SizedBox(height: 16),
-
+                    const SizedBox(height: 10),
                     const Text("How was this step?"),
-
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -302,17 +298,13 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                         ),
                       ],
                     ),
-
-                    const SizedBox(height: 10),
-
+                    const SizedBox(height: 8),
                     Text(
                       currentSeconds < requiredSeconds
                           ? "Remaining: ${requiredSeconds - currentSeconds}s"
                           : "Great job! You can mark this step as completed.",
                     ),
-
-                    const SizedBox(height: 10),
-
+                    const SizedBox(height: 8),
                     ElevatedButton(
                       onPressed:
                           (currentSeconds >= requiredSeconds && !isDone)
