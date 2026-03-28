@@ -144,11 +144,11 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
       case 0:
         return 5;
       case 1:
-        return 15;
+        return 10;
       case 2:
-        return 20;
+        return 10;
       case 3:
-        return 25;
+        return 10;
       default:
         return 10;
     }
@@ -365,7 +365,9 @@ alignment: const Alignment(0, -0.5),
                         Text(
                           currentSeconds < requiredSeconds
                               ? "Keep going • ${requiredSeconds - currentSeconds}s left"
-                              : "Nice work 🎉",
+                              : isGoodSelected == null
+    ? "Please select feedback to continue"
+    : "Nice work 🎉",
                           style: TextStyle(
                               color: Colors.grey[600]),
                         ),

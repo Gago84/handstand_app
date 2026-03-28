@@ -20,15 +20,29 @@ class _StepFinalScreenState extends State<StepFinalScreen> {
     loadData();
   }
 
-  void loadData() async {
-    final prefs = await SharedPreferences.getInstance();
+void loadData() async {
+  final prefs = await SharedPreferences.getInstance();
 
-    setState(() {
-      total = prefs.getInt("total_count") ?? 0;
-      good = prefs.getInt("good_count") ?? 0;
-      practice = prefs.getInt("practice_count") ?? 0;
-    });
+  int totalCount = 0;
+  int goodCount = 0;
+  int practiceCount = 0;
+
+  // 🔥 loop tất cả step (0 → 5)
+  for (int i = 0; i < 6; i++) {
+    final good = prefs.getInt("step_${i}_good") ?? 0;
+    final bad = prefs.getInt("step_${i}_bad") ?? 0;
+
+    goodCount += good;
+    practiceCount += bad;
+    totalCount += good + bad;
   }
+
+  setState(() {
+    total = totalCount;
+    good = goodCount;
+    practice = practiceCount;
+  });
+}
 
   @override
   Widget build(BuildContext context) {

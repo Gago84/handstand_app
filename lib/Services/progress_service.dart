@@ -48,20 +48,38 @@ class ProgressService {
   }
   
   // 🔥 SAVE FEEDBACK COUNT
-  static Future<void> saveFeedback(int index, bool isGood) async {
-    final prefs = await SharedPreferences.getInstance();
+static Future<void> saveFeedback(int index, bool isGood) async {
+  final prefs = await SharedPreferences.getInstance();
 
-    final goodKey = "step_${index}_good";
-    final badKey = "step_${index}_bad";
+  // 🔹 STEP COUNT (giữ nguyên)
+  final goodKey = "step_${index}_good";
+  final badKey = "step_${index}_bad";
 
-    if (isGood) {
-      final current = prefs.getInt(goodKey) ?? 0;
-      await prefs.setInt(goodKey, current + 1);
-    } else {
-      final current = prefs.getInt(badKey) ?? 0;
-      await prefs.setInt(badKey, current + 1);
-    }
+  if (isGood) {
+    final current = prefs.getInt(goodKey) ?? 0;
+    await prefs.setInt(goodKey, current + 1);
+  } else {
+    final current = prefs.getInt(badKey) ?? 0;
+    await prefs.setInt(badKey, current + 1);
   }
+
+  // 🔥 GLOBAL COUNT (FIX CHÍNH)
+  int total = prefs.getInt("total_count") ?? 0;
+  int good = prefs.getInt("good_count") ?? 0;
+  int practice = prefs.getInt("practice_count") ?? 0;
+
+  total++;
+
+  if (isGood) {
+    good++;
+  } else {
+    practice++;
+  }
+
+  await prefs.setInt("total_count", total);
+  await prefs.setInt("good_count", good);
+  await prefs.setInt("practice_count", practice);
+}
 
   // 🔥 GET FEEDBACK
   static Future<Map<String, int>> getFeedback(int index) async {
