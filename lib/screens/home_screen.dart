@@ -8,6 +8,7 @@ import 'subscription_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/progress_service.dart';
 import 'dart:async';
+import 'StepFinalScreen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -197,7 +198,7 @@ _timer = Timer.periodic(const Duration(seconds: 1), (_) async {
                   itemCount: exercises.length,
                   itemBuilder: (context, index) {
                     final exercise = exercises[index];
-
+                    final isFinalStep = exercise.id == "FinalMessage";
                     final prevStepGood =
                         completedSteps.contains("step_${index - 1}");
 
@@ -211,30 +212,42 @@ _timer = Timer.periodic(const Duration(seconds: 1), (_) async {
                         final bad = snapshot.data?["bad"] ?? 0;
 
                         return GestureDetector(
-                          onTap: () async {
-                            if (isLocked) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content:
-                                      Text("Please complete previous step"),
-                                ),
-                              );
-                              return;
-                            }
+ onTap: () async {
+  // 🔒 LOCK logic
+  if (!isFinalStep && isLocked) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Please complete previous step"),
+      ),
+    );
+    return;
+  }
 
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ExerciseDetailScreen(
-                                  exercise: exercise,
-                                  index: index,
-                                ),
-                              ),
-                            );
+  // ✅ FINAL STEP
+  if (isFinalStep) {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const StepFinalScreen(),
+      ),
+    );
+    return;
+  }
 
-                            await loadProgress();
-                            await loadWarmupStatus();
-                          },
+  // 👉 NORMAL STEP
+  await Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => ExerciseDetailScreen(
+        exercise: exercise,
+        index: index,
+      ),
+    ),
+  );
+
+  await loadProgress();
+  await loadWarmupStatus();
+},
                           child: Container(
                             margin: const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 8),
@@ -248,15 +261,15 @@ _timer = Timer.periodic(const Duration(seconds: 1), (_) async {
                               children: [
 
                                 // 🔥 STEP CIRCLE
-                                Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: isLocked
-                                        ? Colors.grey
-                                        : const Color(0xFF00E676),
-                                    shape: BoxShape.circle,
-                                  ),
+Container(
+  width: 40,
+  height: 40,
+  decoration: BoxDecoration(
+    color: isFinalStep
+        ? Colors.orange
+        : (isLocked ? Colors.grey : const Color(0xFF00E676)),
+    shape: BoxShape.circle,
+  ),
                                   child: Center(
                                     child: Text(
                                       "${index + 1}",
@@ -276,8 +289,8 @@ _timer = Timer.periodic(const Duration(seconds: 1), (_) async {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        exercise.title,
+Text(
+  isFinalStep ? "🏁 Final Challenge" : exercise.title,
                                         style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 15,
@@ -298,10 +311,10 @@ _timer = Timer.periodic(const Duration(seconds: 1), (_) async {
                                   ),
                                 ),
 
-                                Icon(
-                                  isLocked
-                                      ? Icons.lock
-                                      : Icons.play_arrow,
+Icon(
+  isFinalStep
+      ? Icons.emoji_events
+      : (isLocked ? Icons.lock : Icons.play_arrow),
                                   color: Colors.white70,
                                   size: 18,
                                 ),
