@@ -214,7 +214,7 @@ _timer = Timer.periodic(const Duration(seconds: 1), (_) async {
                         return GestureDetector(
  onTap: () async {
   // 🔒 LOCK logic
-  if (!isFinalStep && isLocked) {
+  if (isLocked) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text("Please complete previous step"),
