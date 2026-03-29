@@ -18,6 +18,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  int totalGood = 0;
+  int totalReps = 0;
   Timer? _timer;
   bool isSubscribed = false;
 
@@ -31,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
     loadSubscription();
     loadWarmupStatus();
     loadProgress();
+    loadTotals();
 
 _timer = Timer.periodic(const Duration(seconds: 1), (_) async {
   final valid = await ProgressService.isWarmupValid();
@@ -67,7 +70,23 @@ _timer = Timer.periodic(const Duration(seconds: 1), (_) async {
       completedSteps = list.toSet();
     });
   }
+Future<void> loadTotals() async {
+  final prefs = await SharedPreferences.getInstance();
+  final completed = await ProgressService.getCompleted();
 
+  int good = 0;
+  int reps = 0;
+
+  for (var step in completed) {
+    good += prefs.getInt("good_$step") ?? 0;
+    reps += prefs.getInt("reps_$step") ?? 0;
+  }
+
+  setState(() {
+    totalGood = good;
+    totalReps = reps;
+  });
+}
   @override
   void dispose() {
     _timer?.cancel();
@@ -247,6 +266,7 @@ _timer = Timer.periodic(const Duration(seconds: 1), (_) async {
 
   await loadProgress();
   await loadWarmupStatus();
+  await loadTotals();
 },
                           child: Container(
                             margin: const EdgeInsets.symmetric(
@@ -298,15 +318,17 @@ Text(
                                         ),
                                       ),
                                       const SizedBox(height: 4),
-                                      Text(
-                                        isLocked
-                                            ? "Locked"
-                                            : "👍 $good   😓 $bad",
-                                        style: const TextStyle(
-                                          color: Colors.white54,
-                                          fontSize: 12,
-                                        ),
-                                      ),
+Text(
+  isFinalStep
+      ? "Locked   👍 $totalGood   🔁 $totalReps"
+      : (isLocked
+          ? "Locked"
+          : "👍 $good   😓 $bad"),
+  style: const TextStyle(
+    color: Colors.white54,
+    fontSize: 12,
+  ),
+),
                                     ],
                                   ),
                                 ),
