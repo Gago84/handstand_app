@@ -90,4 +90,26 @@ static Future<void> saveFeedback(int index, bool isGood) async {
       "bad": prefs.getInt("step_${index}_bad") ?? 0,
     };
   }
+  static Future<Map<String, int>> getTotals() async {
+  final prefs = await SharedPreferences.getInstance();
+
+  int total = 0;
+  int good = 0;
+  int practice = 0;
+
+  for (int i = 0; i < 6; i++) {
+    final g = prefs.getInt("step_${i}_good") ?? 0;
+    final b = prefs.getInt("step_${i}_bad") ?? 0;
+
+    good += g;
+    practice += b;
+    total += g + b;
+  }
+
+  return {
+    "total": total,
+    "good": good,
+    "practice": practice,
+  };
+}
 }
