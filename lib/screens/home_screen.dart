@@ -3,7 +3,7 @@ import '../models/exercise.dart';
 import 'exercise_detail_screen.dart';
 import 'about_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../widgets/banner_ad_widget.dart';
+
 import 'subscription_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/progress_service.dart';
@@ -352,14 +352,14 @@ Icon(
         },
       ),
 
-      bottomNavigationBar: isSubscribed
-          ? null
-          : const SafeArea(
-              child: Padding(
-                padding: EdgeInsets.only(bottom: 8),
-                child: BannerAdWidget(),
-              ),
-            ),
+      bottomNavigationBar: null,
+          // ? null
+          // : const SafeArea(
+          //     child: Padding(
+          //       padding: EdgeInsets.only(bottom: 8),
+          //       child: BannerAdWidget(),
+          //     ),
+          //   ),
     );
   }
 }
