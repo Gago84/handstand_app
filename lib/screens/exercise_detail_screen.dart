@@ -269,8 +269,9 @@ Widget _segment(String text, bool isGood) {
               child: ClipRect(
                 child: SizedBox(
                   width: double.infinity,
-                  child: FittedBox(
-                    fit: BoxFit.cover,
+                  child: 
+                  FittedBox(
+                    fit: BoxFit.contain,
 alignment: const Alignment(0, -0.5),
                     child: SizedBox(
                       width: MediaQuery.of(context).size.width,
