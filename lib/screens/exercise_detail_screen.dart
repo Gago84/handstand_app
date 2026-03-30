@@ -375,23 +375,30 @@ alignment: const Alignment(0, -0.5),
                         const SizedBox(height: 12),
 
                         GestureDetector(
-onTap: (currentSeconds >= requiredSeconds &&
-        !isDone &&
-        isGoodSelected != null)
-    ? () async {
-        HapticFeedback.mediumImpact();
+onTap: () async {
+  if (currentSeconds < requiredSeconds) return;
 
-        // ✅ SAVE feedback tại đây (1 lần duy nhất)
-        if (isGoodSelected != null) {
-          await ProgressService.saveFeedback(
-              widget.index, isGoodSelected!);
-        }
+  if (isGoodSelected == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Please select 👍 Good or 😓 Practice first"),
+        duration: Duration(seconds: 2),
+      ),
+    );
+    return;
+  }
 
-        await ProgressService.markDone("step_${widget.index}");
+  if (isDone) return;
 
-        Navigator.pop(context);
-      }
-    : null,
+  HapticFeedback.mediumImpact();
+
+  await ProgressService.saveFeedback(
+      widget.index, isGoodSelected!);
+
+  await ProgressService.markDone("step_${widget.index}");
+
+  Navigator.pop(context);
+},
                           child: Container(
                             width: double.infinity,
                             padding:
