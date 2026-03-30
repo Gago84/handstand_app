@@ -376,26 +376,25 @@ alignment: const Alignment(0, -0.5),
 
                         GestureDetector(
 onTap: () async {
-  if (currentSeconds < requiredSeconds) return;
+  if (currentSeconds < requiredSeconds && !isDone) return;
 
   if (isGoodSelected == null) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text("Please select 👍 Good or 😓 Practice first"),
-        duration: Duration(seconds: 2),
       ),
     );
     return;
   }
 
-  if (isDone) return;
+// ✅ ALWAYS save feedback
+await ProgressService.saveFeedback(
+    widget.index, isGoodSelected!);
 
-  HapticFeedback.mediumImpact();
-
-  await ProgressService.saveFeedback(
-      widget.index, isGoodSelected!);
-
+// ✅ Only mark done once
+if (!isDone) {
   await ProgressService.markDone("step_${widget.index}");
+}
 
   Navigator.pop(context);
 },
@@ -405,31 +404,27 @@ onTap: () async {
                                 const EdgeInsets.symmetric(
                                     vertical: 14),
                             decoration: BoxDecoration(
-                              color: (currentSeconds >=
-                                          requiredSeconds &&
-                                      !isDone)
-                                  ? Colors.black
-                                  : Colors.grey[300],
+color: isDone
+    ? Colors.black
+    : (currentSeconds >= requiredSeconds
+        ? Colors.black
+        : Colors.grey[300]),
                               borderRadius:
                                   BorderRadius.circular(30),
                             ),
                             child: Center(
-                              child: Text(
-                                currentSeconds <
-                                        requiredSeconds
-                                    ? "Train at least $requiredSeconds seconds"
-                                    : (isDone
-                                        ? "Completed ✅"
-                                        : "Mark as Done"),
-                                style: TextStyle(
-                                  color: (currentSeconds >=
-                                              requiredSeconds &&
-                                          !isDone)
-                                      ? Colors.white
-                                      : Colors.black54,
-                                  fontWeight:
-                                      FontWeight.w500,
-                                ),
+child: Text(
+  currentSeconds < requiredSeconds
+      ? "Train at least $requiredSeconds seconds"
+      : (isDone
+          ? "Back to Home"
+          : "Mark as Done"),
+style: TextStyle(
+  color: (currentSeconds >= requiredSeconds || isDone)
+      ? Colors.white
+      : Colors.black54,
+  fontWeight: FontWeight.w500,
+),
                               ),
                             ),
                           ),

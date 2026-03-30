@@ -51,7 +51,6 @@ class ProgressService {
 static Future<void> saveFeedback(int index, bool isGood) async {
   final prefs = await SharedPreferences.getInstance();
 
-  // 🔹 STEP COUNT (giữ nguyên)
   final goodKey = "step_${index}_good";
   final badKey = "step_${index}_bad";
 
@@ -62,23 +61,6 @@ static Future<void> saveFeedback(int index, bool isGood) async {
     final current = prefs.getInt(badKey) ?? 0;
     await prefs.setInt(badKey, current + 1);
   }
-
-  // 🔥 GLOBAL COUNT (FIX CHÍNH)
-  int total = prefs.getInt("total_count") ?? 0;
-  int good = prefs.getInt("good_count") ?? 0;
-  int practice = prefs.getInt("practice_count") ?? 0;
-
-  total++;
-
-  if (isGood) {
-    good++;
-  } else {
-    practice++;
-  }
-
-  await prefs.setInt("total_count", total);
-  await prefs.setInt("good_count", good);
-  await prefs.setInt("practice_count", practice);
 }
 
   // 🔥 GET FEEDBACK

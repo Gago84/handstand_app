@@ -248,6 +248,7 @@ _timer = Timer.periodic(const Duration(seconds: 1), (_) async {
 
   await loadProgress();
   await loadWarmupStatus();
+  setState(() {}); // 🔥 IMPORTANT: force rebuild list + FutureBuilder
 },
                           child: Container(
                             margin: const EdgeInsets.symmetric(
