@@ -318,13 +318,15 @@ if (isFinalStep)
     },
   )
 else
-  Text(
-    "🔒 Locked   👍 $good   😓 $bad",
-    style: TextStyle(
-      color: isLocked ? Colors.white38 : Colors.white54,
-      fontSize: 12,
-    ),
+Text(
+  isLocked
+      ? "🔒 Locked   👍 $good   😓 $bad"
+      : "👍 $good   😓 $bad",
+  style: TextStyle(
+    color: isLocked ? Colors.white38 : Colors.white54,
+    fontSize: 12,
   ),
+),
                                     ],
                                   ),
                                 ),
@@ -333,9 +335,9 @@ Icon(
   isFinalStep
       ? Icons.emoji_events
       : (isLocked ? Icons.lock : Icons.play_arrow),
-                                  color: Colors.white70,
-                                  size: 18,
-                                ),
+  color: isLocked ? Colors.white38 : Colors.white70,
+  size: 18,
+),
                               ],
                             ),
                           ),
