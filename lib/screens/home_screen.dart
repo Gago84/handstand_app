@@ -218,7 +218,7 @@ _timer = Timer.periodic(const Duration(seconds: 1), (_) async {
   if (isLocked) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text("Please complete previous step"),
+        content: Text("Complete warm-up & previous step first"),
       ),
     );
     return;
@@ -300,30 +300,31 @@ Text(
                                         ),
                                       ),
                                       const SizedBox(height: 4),
-isFinalStep
-    ? FutureBuilder<Map<String, int>>(
-        future: ProgressService.getTotals(),
-        builder: (context, snapshot) {
-          final good = snapshot.data?["good"] ?? 0;
-          final bad = snapshot.data?["practice"] ?? 0;
-          final total = snapshot.data?["total"] ?? 0;
+if (isFinalStep)
+  FutureBuilder<Map<String, int>>(
+    future: ProgressService.getTotals(),
+    builder: (context, snapshot) {
+      final good = snapshot.data?["good"] ?? 0;
+      final bad = snapshot.data?["practice"] ?? 0;
+      final total = snapshot.data?["total"] ?? 0;
 
-          return Text(
-            "Locked   👍 $good   😓 $bad   🔁 $total",
-            style: const TextStyle(
-              color: Colors.white54,
-              fontSize: 12,
-            ),
-          );
-        },
-      )
-    : Text(
-        isLocked ? "Locked" : "👍 $good   😓 $bad",
+      return Text(
+        "👍 $good   😓 $bad   🔁 $total",
         style: const TextStyle(
           color: Colors.white54,
           fontSize: 12,
         ),
-      ),
+      );
+    },
+  )
+else
+  Text(
+    "🔒 Locked   👍 $good   😓 $bad",
+    style: TextStyle(
+      color: isLocked ? Colors.white38 : Colors.white54,
+      fontSize: 12,
+    ),
+  ),
                                     ],
                                   ),
                                 ),
