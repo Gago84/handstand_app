@@ -117,59 +117,6 @@ void loadData() async {
 
                 const SizedBox(height: 30), // ✅ replace Spacer()
 
-                // 🔒 PREMIUM CARD
-                Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Column(
-                    children: [
-                      const Text(
-                        "🚀 Next Level",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-
-                      const SizedBox(height: 8),
-
-                      const Text(
-                        "Unlock advanced handstand balance,\nfreestanding control and transitions.",
-                        style: TextStyle(
-                          color: Colors.white70,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      GestureDetector(
-                        onTap: () {
-                          // 👉 TODO: open paywall
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 14, horizontal: 20),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: const Text(
-                            "Unlock Premium 🔥",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-
                 const SizedBox(height: 10),
               ],
             ),

@@ -3,8 +3,6 @@ import '../models/exercise.dart';
 import 'exercise_detail_screen.dart';
 import 'about_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../widgets/banner_ad_widget.dart';
-import 'subscription_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/progress_service.dart';
 import 'dart:async';
@@ -20,7 +18,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
 
   Timer? _timer;
-  bool isSubscribed = false;
 
   bool isWarmupValid = false;
   Set<String> completedSteps = {};
@@ -29,7 +26,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
 
-    loadSubscription();
     loadWarmupStatus();
     loadProgress();
 
@@ -44,14 +40,6 @@ _timer = Timer.periodic(const Duration(seconds: 1), (_) async {
 });
   }
 
-  Future<void> loadSubscription() async {
-    final prefs = await SharedPreferences.getInstance();
-    final value = prefs.getBool('isSubscribed') ?? false;
-
-    setState(() {
-      isSubscribed = value;
-    });
-  }
 
   Future<void> loadWarmupStatus() async {
     final valid = await ProgressService.isWarmupValid();
@@ -103,18 +91,7 @@ _timer = Timer.periodic(const Duration(seconds: 1), (_) async {
               );
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.star),
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const SubscriptionPage()),
-              );
-              await loadProgress();
-              loadSubscription();
-            },
-          )
+
         ],
       ),
 
@@ -352,14 +329,7 @@ Icon(
         },
       ),
 
-      bottomNavigationBar: isSubscribed
-          ? null
-          : const SafeArea(
-              child: Padding(
-                padding: EdgeInsets.only(bottom: 8),
-                child: BannerAdWidget(),
-              ),
-            ),
+
     );
   }
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart'; // 👈 QUAN TRỌNG
 import 'screens/home_screen.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:flutter/services.dart';
 import 'screens/welcome_screen.dart';
 
@@ -12,8 +11,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform, // 👈 QUAN TRỌNG
   );
-    // 👇 THÊM DÒNG NÀY
-  await MobileAds.instance.initialize();
+
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
