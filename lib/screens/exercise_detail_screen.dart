@@ -136,6 +136,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
   int currentSeconds = 0;
   bool warmupSaved = false;
   late int requiredSeconds;
+  String currentInstruction = '';
 
   bool _wasPlaying = false;
 
@@ -158,7 +159,11 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
   void initState() {
     super.initState();
 
-    requiredSeconds = getRequiredSeconds(widget.index);
+    final firstStep =
+        widget.exercise.steps.isNotEmpty ? widget.exercise.steps.first : null;
+    requiredSeconds =
+        firstStep?.duration ?? getRequiredSeconds(widget.index);
+    currentInstruction = firstStep?.instruction ?? '';
 
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -290,12 +295,27 @@ alignment: const Alignment(0, -0.5),
             if (!isFullScreen)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Opacity(
-                  opacity: 0.6,
-                  child: Text(
-                    "Track your training time and mark your progress",
-                    style: const TextStyle(fontSize: 12),
-                  ),
+                child: Column(
+                  children: [
+                    if (currentInstruction.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          currentInstruction,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ),
+                    if (currentInstruction.isNotEmpty)
+                      const SizedBox(height: 6),
+                    Opacity(
+                      opacity: 0.6,
+                      child: Text(
+                        "Track your training time and mark your progress",
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ),
+                  ],
                 ),
               ),
           ],
