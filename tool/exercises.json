@@ -1,0 +1,78 @@
+[
+  {
+    "id": "WarmUp",
+    "title": "Warm Up",
+    "order": 1,
+    "VideoPortraitScreen": "iHI3LerTZWE",
+    "VideoLandScreen": "QCiBnoNiypU",
+    "steps": [
+      {
+        "instruction": "Warm up preparation",
+        "duration": 5
+      }
+    ]
+  },
+  {
+    "id": "FaceToWall",
+    "title": "Face to Wall",
+    "order": 2,
+    "VideoPortraitScreen": "1GmZJBZAX8g",
+    "VideoLandScreen": "maRWwfXfuAs",
+    "steps": [
+      {
+        "instruction": "Face to wall position",
+        "duration": 5
+      }
+    ]
+  },
+  {
+    "id": "BackToWall",
+    "title": "Back to Wall",
+    "order": 3,
+    "VideoPortraitScreen": "HpvbeaXU8LU",
+    "VideoLandScreen": "7AcBcTZ7f2I",
+    "steps": [
+      {
+        "instruction": "Back to wall position",
+        "duration": 5
+      }
+    ]
+  },
+  {
+    "id": "ExitHandstand",
+    "title": "Exit Handstand",
+    "order": 4,
+    "VideoPortraitScreen": "dRnJIdZE4q0",
+    "VideoLandScreen": "CriqdzsrZnM",
+    "steps": [
+      {
+        "instruction": "Exit safely from handstand",
+        "duration": 5
+      }
+    ]
+  },
+  {
+    "id": "FreeHandstand",
+    "title": "Free Handstand",
+    "order": 5,
+    "VideoPortraitScreen": "TQpJQFZwAsg",
+    "VideoLandScreen": "wwQdLa811iE",
+    "steps": [
+      {
+        "instruction": "Balance without wall support",
+        "duration": 5
+      }
+    ]
+  },
+  {
+    "id": "FinalMessage",
+    "title": "Final Message",
+    "order": 6,
+    "steps": [
+      {
+        "instruction": "Great job completing the session",
+        "duration": 5
+      }
+    ]
+  }
+]
