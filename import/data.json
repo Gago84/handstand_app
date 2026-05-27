@@ -1,0 +1,1397 @@
+{
+  "HandStand": [
+    {
+      "id": "WarmUp",
+      "steps": [
+        {
+          "duration": 5,
+          "instruction": "Warm up preparation"
+        }
+      ],
+      "title": "Warm Up",
+      "order": 1,
+      "VideoLandScreen": "QCiBnoNiypU",
+      "VideoPortraitScreen": "iHI3LerTZWE"
+    },
+    {
+      "id": "FaceToWall",
+      "steps": [
+        {
+          "instruction": "Face to wall position",
+          "duration": 5
+        }
+      ],
+      "title": "Face to Wall",
+      "VideoLandScreen": "maRWwfXfuAs",
+      "order": 2,
+      "VideoPortraitScreen": "1GmZJBZAX8g"
+    },
+    {
+      "id": "BackToWall",
+      "VideoPortraitScreen": "HpvbeaXU8LU",
+      "order": 3,
+      "VideoLandScreen": "7AcBcTZ7f2I",
+      "title": "Back to Wall",
+      "steps": [
+        {
+          "instruction": "Back to wall position",
+          "duration": 5
+        }
+      ]
+    },
+    {
+      "id": "ExitHandstand",
+      "VideoLandScreen": "CriqdzsrZnM",
+      "order": 4,
+      "VideoPortraitScreen": "dRnJIdZE4q0",
+      "steps": [
+        {
+          "duration": 5,
+          "instruction": "Exit safely from handstand"
+        }
+      ],
+      "title": "Exit Handstand"
+    },
+    {
+      "id": "FreeHandstand",
+      "steps": [
+        {
+          "instruction": "Balance without wall support",
+          "duration": 5
+        }
+      ],
+      "title": "Free Handstand",
+      "VideoLandScreen": "wwQdLa811iE",
+      "order": 5,
+      "VideoPortraitScreen": "TQpJQFZwAsg"
+    },
+    {
+      "id": "FinalMessage",
+      "title": "Final Message",
+      "order": 6,
+      "steps": [
+        {
+          "duration": 5,
+          "instruction": "Great job completing the session"
+        }
+      ]
+    }
+  ],
+  "about": [
+    {
+      "id": "zxQcZKQkB3B061kWHbVi",
+      "title": "Handstand: Học Cách “Đứng Lại” Để Thấu Hiểu Bản Thân",
+      "title_en": "Handstand: Practicing standing up again from the beginning",
+      "title_vi": "Handstand: Học Cách “Đứng Lại” để khởi đầu",
+      "content_vi": "Handstand – trồng cây chuối – không chỉ là một động tác hình thể. \nĐó là một trải nghiệm đảo ngược thế giới để nhìn lại chính mình.\nKhi cơ thể lật ngược, mọi thứ quen thuộc bỗng trở nên xa lạ. \nĐôi chân không còn là nền tảng. Đôi tay phải gánh vác toàn bộ trọng lượng cơ thể. \nTrong khoảnh khắc ấy, bạn học lại cách “đứng” từ đầu.\nCảm giác đó vừa mong manh vừa mạnh mẽ – giống như một đứa trẻ chập chững tập đi, \nnhưng lần này là với sự tỉnh thức của một người trưởng thành.\n🔬 Về mặt khoa học, Handstand là một liều thuốc quý cho sức khỏe:\n❤️ Hệ tuần hoàn  \nKhi đảo ngược cơ thể, máu được hỗ trợ quay về tim hiệu quả hơn, \nkích thích lưu thông và giúp tim hoạt động linh hoạt hơn.\n💪 Sức mạnh toàn thân  \nĐể giữ được thăng bằng, cơ vai, lưng, core và cả đôi chân \nphải phối hợp nhịp nhàng như một hệ thống thống nhất.\n🧠 Sự tập trung tuyệt đối  \nChỉ cần một giây lơ đãng, bạn sẽ mất thăng bằng. \nHandstand buộc bạn phải hiện diện hoàn toàn trong khoảnh khắc.\n⚖️ Khả năng thăng bằng – tài sản quý sau tuổi trung niên\nSau tuổi trung niên, khả năng giữ thăng bằng là một trong những năng lực suy giảm nhanh nhất của cơ thể.\nTheo World Health Organization, té ngã là một trong những nguyên nhân hàng đầu gây chấn thương nghiêm trọng ở người trên 50 tuổi.\nĐiều đó cho thấy thăng bằng không chỉ là kỹ năng thể thao — mà là nền tảng của sự độc lập và an toàn khi chúng ta lớn tuổi.\nTập luyện các bài đảo ngược như handstand (ở mức độ phù hợp) giúp hệ thần kinh – tiền đình – cơ xương khớp duy trì khả năng phản xạ, định vị và kiểm soát cơ thể trong không gian.\nThực tế, Handstand chưa bao giờ là dễ dàng – dù chỉ trong một giây.  \nĐó là cuộc đối thoại bền bỉ giữa ý chí và từng đầu ngón tay.\nNhưng cũng chính vì thế, nó phản chiếu cuộc sống một cách chân thật.\nChúng ta không ngừng ngã.  \nChúng ta điều chỉnh từng chút một.  \nChúng ta tìm điểm cân bằng giữa hỗn loạn.\nVà rồi, mỗi ngày, ta đứng vững hơn một chút.",
+      "content_en": "It is an experience of turning the world upside down to rediscover yourself.\nWhen the body inverts, everything familiar suddenly feels unfamiliar.\nYour feet are no longer the foundation. Your hands must carry the entire weight of your body.\nIn that moment, you learn how to “stand” all over again.\nThe feeling is both fragile and powerful—like a child taking their first steps,\nbut this time with the awareness of an adult.\n🔬 Scientifically, the handstand is a valuable medicine for health:\n❤️ Circulatory system\nWhen the body is inverted, blood is assisted in returning to the heart more efficiently,\nstimulating circulation and helping the heart function more effectively.\n💪 Full-body strength\nTo maintain balance, the shoulders, back, core, and even the legs\nmust work together harmoniously as one integrated system.\n🧠 Total concentration\nJust one moment of distraction, and you lose balance.\nHandstand forces you to be fully present in the moment.\n⚖️ Balance ability – a precious asset after midlife\nAfter midlife, balance is one of the fastest-declining abilities of the human body.\nAccording to the World Health Organization, falls are one of the leading causes of serious injury in people over 50.\nThis shows that balance is not just an athletic skill—it is the foundation of independence and safety as we age.\nPracticing inversions like the handstand (at an appropriate level) helps the nervous, vestibular, and musculoskeletal systems maintain reflexes, spatial awareness, and body control.\nIn truth, a handstand has never been easy—not even for a second.\nIt is an ongoing dialogue between your willpower and your fingertips.\nAnd because of that, it reflects life with honesty.\nWe fall, again and again.\nWe adjust, little by little.\nWe search for balance within chaos.\nAnd each day, we stand a little steadier.",
+      "content": "Handstand – trồng cây chuối – không chỉ là một động tác hình thể. \nĐó là một trải nghiệm đảo ngược thế giới để nhìn lại chính mình.\nKhi cơ thể lật ngược, mọi thứ quen thuộc bỗng trở nên xa lạ. \nĐôi chân không còn là nền tảng. Đôi tay phải gánh vác toàn bộ trọng lượng cơ thể. \nTrong khoảnh khắc ấy, bạn học lại cách “đứng” từ đầu.\nCảm giác đó vừa mong manh vừa mạnh mẽ – giống như một đứa trẻ chập chững tập đi, \nnhưng lần này là với sự tỉnh thức của một người trưởng thành.\n🔬 Về mặt khoa học, Handstand là một liều thuốc quý cho sức khỏe:\n❤️ Hệ tuần hoàn  \nKhi đảo ngược cơ thể, máu được hỗ trợ quay về tim hiệu quả hơn, \nkích thích lưu thông và giúp tim hoạt động linh hoạt hơn.\n💪 Sức mạnh toàn thân  \nĐể giữ được thăng bằng, cơ vai, lưng, core và cả đôi chân \nphải phối hợp nhịp nhàng như một hệ thống thống nhất.\n🧠 Sự tập trung tuyệt đối  \nChỉ cần một giây lơ đãng, bạn sẽ mất thăng bằng. \nHandstand buộc bạn phải hiện diện hoàn toàn trong khoảnh khắc.\n⚖️ Khả năng thăng bằng – tài sản quý sau tuổi trung niên\nSau tuổi trung niên, khả năng giữ thăng bằng là một trong những năng lực suy giảm nhanh nhất của cơ thể.\nTheo World Health Organization, té ngã là một trong những nguyên nhân hàng đầu gây chấn thương nghiêm trọng ở người trên 50 tuổi.\nĐiều đó cho thấy thăng bằng không chỉ là kỹ năng thể thao — mà là nền tảng của sự độc lập và an toàn khi chúng ta lớn tuổi.\nTập luyện các bài đảo ngược như handstand (ở mức độ phù hợp) giúp hệ thần kinh – tiền đình – cơ xương khớp duy trì khả năng phản xạ, định vị và kiểm soát cơ thể trong không gian.\nThực tế, Handstand chưa bao giờ là dễ dàng – dù chỉ trong một giây.  \nĐó là cuộc đối thoại bền bỉ giữa ý chí và từng đầu ngón tay.\nNhưng cũng chính vì thế, nó phản chiếu cuộc sống một cách chân thật.\nChúng ta không ngừng ngã.  \nChúng ta điều chỉnh từng chút một.  \nChúng ta tìm điểm cân bằng giữa hỗn loạn.\nVà rồi, mỗi ngày, ta đứng vững hơn một chút."
+    }
+  ],
+  "appNavigation": [
+    {
+      "id": "tabs",
+      "items": [
+        {
+          "index": 1,
+          "active": true,
+          "title_en": "About",
+          "title_vi": "Gioi thieu",
+          "key": "about"
+        },
+        {
+          "key": "exercise",
+          "title_vi": "Bai tap",
+          "title_en": "Exercises",
+          "index": 2,
+          "active": true
+        },
+        {
+          "title_vi": "Lich tap",
+          "title_en": "Programs",
+          "active": false,
+          "index": 3,
+          "key": "programs"
+        },
+        {
+          "title_vi": "Meo tap",
+          "title_en": "Tips",
+          "active": true,
+          "index": 4,
+          "key": "tip"
+        },
+        {
+          "title_en": "Software",
+          "title_vi": "Phan mem",
+          "index": 5,
+          "active": true,
+          "key": "software"
+        },
+        {
+          "key": "other",
+          "title_vi": "Tan man",
+          "title_en": "Notes",
+          "index": 6,
+          "active": true
+        }
+      ]
+    }
+  ],
+  "exerciseIntro": [
+    {
+      "id": "basicEquipment",
+      "description_en": "Two useful tools for building strength and mobility for handstand training.",
+      "title_vi": "Thiet bi co ban",
+      "description_vi": "Hai thiet bi nen co de tap suc manh va do deo cho handstand.",
+      "active": true,
+      "index": 1,
+      "title_en": "Basic equipment"
+    },
+    {
+      "id": "bodyBasics",
+      "description_vi": "Gioi thieu cac nhom co va khop quan trong khi tap handstand.",
+      "active": true,
+      "description_en": "An overview of the key muscles and joints used in handstand training.",
+      "title_vi": "Nhom co va khop co ban",
+      "imageUrls": [
+        "",
+        ""
+      ],
+      "title_en": "Basic muscle groups and joints",
+      "index": 2
+    }
+  ],
+  "exercises": [
+    {
+      "id": "warmup",
+      "active": true,
+      "index": 1,
+      "description_vi": "Cac bai tap nho de lam nong toan than truoc khi tap.",
+      "description_en": "Small exercises to warm up the whole body before training.",
+      "title_vi": "Lam nong",
+      "title_en": "Warm-up",
+      "groups": [
+        {
+          "id": "general",
+          "index": 1,
+          "imageUrl": "",
+          "title_vi": "Lam nong toan than",
+          "title_en": "General warm-up",
+          "active": true,
+          "items": [
+            {
+              "id": "jumpingJack",
+              "sets": 2,
+              "description_en": "Warms up the whole body and raises heart rate.",
+              "reps": "",
+              "title_vi": "Jumping jack",
+              "targetMuscles": [
+                "calves",
+                "quads",
+                "deltoids"
+              ],
+              "title_en": "Jumping jack",
+              "description_vi": "Lam nong toan than va tang nhip tim.",
+              "level": "beginner",
+              "videoShortUrl": "https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Fwarmup%2Fjumping-jack.mp4?alt=media&token=58ce29e1-4b64-4f76-9431-55454e5f089d",
+              "index": 1,
+              "imageUrl": "",
+              "active": true,
+              "targetJoints": [
+                "ankles",
+                "hips",
+                "shoulders"
+              ],
+              "durationSeconds": 45,
+              "equipment": [
+                "none"
+              ]
+            },
+            {
+              "id": "skippingRun",
+              "description_en": "Warms up legs, hips, and ankles with a light running drill.",
+              "sets": 2,
+              "reps": "",
+              "title_vi": "Skipping run",
+              "targetMuscles": [
+                "calves",
+                "quads",
+                "hamstrings"
+              ],
+              "title_en": "Skipping run",
+              "videoShortUrl": "https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Fwarmup%2Fskipping-run.mp4?alt=media&token=cbf66a5b-418f-40e3-89ad-e03bd2d5ce5c",
+              "description_vi": "Lam nong chan, hong va co chan bang dong tac chay nang nhe.",
+              "level": "beginner",
+              "imageUrl": "",
+              "index": 2,
+              "active": true,
+              "targetJoints": [
+                "ankles",
+                "hips",
+                "knees"
+              ],
+              "durationSeconds": 45,
+              "equipment": [
+                "none"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lowerBody",
+      "description_en": "Single exercises for glutes, hamstrings, calves, and quads.",
+      "title_vi": "Than duoi",
+      "title_en": "Lower body",
+      "description_vi": "Bai tap don le cho mong, dui sau, bap chan va dui truoc.",
+      "index": 2,
+      "active": true,
+      "groups": [
+        {
+          "id": "glute",
+          "imageUrl": "",
+          "active": true,
+          "index": 1,
+          "title_en": "Glutes",
+          "title_vi": "Co mong",
+          "items": [
+            {
+              "id": "gluteBridge",
+              "reps": "12-15",
+              "title_vi": "Glute bridge",
+              "equipment": [
+                "none"
+              ],
+              "description_en": "Activates glutes and improves hip stability.",
+              "description_vi": "Kich hoat co mong va on dinh hong.",
+              "videoShortUrl": "https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Flower-body%2Fglute-bridge.mp4?alt=media&token=ef393d00-69e2-4f8f-b02a-1e6447716610",
+              "durationSeconds": 0,
+              "sets": 3,
+              "imageUrl": "",
+              "title_en": "Glute bridge",
+              "active": true,
+              "targetMuscles": [
+                "glute",
+                "hamstrings"
+              ],
+              "index": 1,
+              "level": "beginner",
+              "targetJoints": [
+                "hips"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "hamstrings",
+          "index": 2,
+          "active": false,
+          "imageUrl": "",
+          "title_vi": "Dui sau",
+          "title_en": "Hamstrings"
+        },
+        {
+          "id": "calves",
+          "title_vi": "Bap chan",
+          "title_en": "Calves",
+          "index": 3,
+          "active": true,
+          "imageUrl": "",
+          "items": [
+            {
+              "id": "singleCalfRaise",
+              "reps": "12-15",
+              "durationSeconds": 0,
+              "videoShortUrl": "https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Flower-body%2Fsingle-calf-raise.mp4?alt=media&token=d22d8114-c3a2-42ee-a3ee-af191ff375e3",
+              "description_en": "Trains one calf at a time to build calf strength and balance.",
+              "imageUrl": "",
+              "active": true,
+              "description_vi": "Tap bap chan tung ben de tang suc manh va kha nang giu thang bang.",
+              "index": 1,
+              "sets": 3,
+              "level": "beginner",
+              "equipment": [
+                "none"
+              ],
+              "title_vi": "Single calf raise",
+              "targetMuscles": [
+                "calves"
+              ],
+              "targetJoints": [
+                "ankles"
+              ],
+              "title_en": "Single calf raise"
+            }
+          ]
+        },
+        {
+          "id": "quads",
+          "title_vi": "Dui truoc",
+          "title_en": "Quads",
+          "imageUrl": "",
+          "active": true,
+          "index": 4,
+          "items": [
+            {
+              "id": "bungarianSplit",
+              "reps": "8-12",
+              "durationSeconds": 0,
+              "videoShortUrl": "https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Flower-body%2Fbungarian-split.mp4?alt=media&token=a312eedf-f395-47e6-9c5d-ab9e49401b9f",
+              "level": "beginner",
+              "sets": 3,
+              "index": 1,
+              "description_vi": "Tap dui truoc tung ben voi mot chan dat phia sau.",
+              "active": true,
+              "imageUrl": "",
+              "description_en": "Trains one quad at a time with the rear foot elevated behind you.",
+              "targetMuscles": [
+                "quads"
+              ],
+              "title_vi": "Bungarian split",
+              "equipment": [
+                "bench"
+              ],
+              "title_en": "Bungarian split",
+              "targetJoints": [
+                "hips",
+                "knees",
+                "ankles"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "core",
+      "description_vi": "Bai tap don le cho bung, co lien suon va lung.",
+      "index": 3,
+      "title_vi": "Core",
+      "title_en": "Core",
+      "description_en": "Single exercises for abs, obliques, and back.",
+      "active": true,
+      "groups": [
+        {
+          "id": "abs",
+          "imageUrl": "",
+          "active": true,
+          "index": 1,
+          "title_en": "Abs",
+          "title_vi": "Co bung",
+          "items": [
+            {
+              "id": "hollowRock",
+              "durationSeconds": 30,
+              "videoShortUrl": "https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Fcore%2Fhollow-rock.mp4?alt=media&token=e4841da5-ba8d-4200-93fa-2e1af6182904",
+              "equipment": [
+                "none"
+              ],
+              "title_vi": "Hollow rock",
+              "description_vi": "Giu than nguoi cong nhu chiec thuyen va lac nhe de tap co bung.",
+              "description_en": "Holds a hollow body shape and rocks gently to train the abs.",
+              "reps": "",
+              "targetJoints": [
+                "spine",
+                "hips"
+              ],
+              "targetMuscles": [
+                "abs"
+              ],
+              "level": "beginner",
+              "index": 1,
+              "active": true,
+              "imageUrl": "",
+              "title_en": "Hollow rock",
+              "sets": 3
+            },
+            {
+              "id": "plank",
+              "sets": 3,
+              "title_en": "Plank",
+              "imageUrl": "",
+              "active": true,
+              "level": "beginner",
+              "index": 2,
+              "targetMuscles": [
+                "abs"
+              ],
+              "targetJoints": [
+                "shoulders",
+                "spine",
+                "hips"
+              ],
+              "reps": "",
+              "description_en": "Holds a straight body line to build abs strength and core stability.",
+              "description_vi": "Giu than nguoi thang de tang suc manh co bung va on dinh core.",
+              "equipment": [
+                "none"
+              ],
+              "title_vi": "Plank",
+              "videoShortUrl": "https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Fcore%2Fplank.mp4?alt=media&token=3804160e-8ca7-4131-9d2a-3bbafd497298",
+              "durationSeconds": 30
+            }
+          ]
+        },
+        {
+          "id": "obliques",
+          "imageUrl": "",
+          "index": 2,
+          "active": true,
+          "title_vi": "Co lien suon",
+          "title_en": "Obliques",
+          "items": [
+            {
+              "id": "sidePlank",
+              "description_vi": "Giu plank nghieng de tang suc manh co lien suon va on dinh than nguoi.",
+              "index": 1,
+              "durationSeconds": 30,
+              "targetMuscles": [
+                "obliques"
+              ],
+              "equipment": [
+                "none"
+              ],
+              "reps": "",
+              "active": true,
+              "level": "beginner",
+              "sets": 3,
+              "imageUrl": "",
+              "description_en": "Holds a side plank to build oblique strength and trunk stability.",
+              "title_vi": "Side plank",
+              "title_en": "Side plank",
+              "targetJoints": [
+                "shoulders",
+                "spine",
+                "hips"
+              ],
+              "videoShortUrl": "https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Fcore%2Fside-plank.mp4?alt=media&token=406de690-cdea-4548-a35f-cb713c3b9983"
+            }
+          ]
+        },
+        {
+          "id": "lowerBack",
+          "imageUrl": "",
+          "index": 3,
+          "active": true,
+          "title_vi": "Lung",
+          "title_en": "Back",
+          "items": [
+            {
+              "id": "archUp",
+              "index": 1,
+              "description_vi": "Nang nguc va chan khoi san de tap lung va duong cong than sau.",
+              "targetMuscles": [
+                "back"
+              ],
+              "durationSeconds": 0,
+              "equipment": [
+                "none"
+              ],
+              "level": "beginner",
+              "active": true,
+              "reps": "10-12",
+              "sets": 3,
+              "imageUrl": "",
+              "description_en": "Lifts the chest and legs from the floor to train the back body line.",
+              "title_vi": "Arch Up",
+              "title_en": "Arch Up",
+              "targetJoints": [
+                "spine",
+                "hips",
+                "shoulders"
+              ],
+              "videoShortUrl": "https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Fcore%2Farch-up.mp4?alt=media&token=f4d5fdfa-afac-49ea-925f-4f7d7520ec8e"
+            }
+          ]
+        },
+        {
+          "id": "middleBack",
+          "title_en": "Middle back",
+          "title_vi": "Lung giua",
+          "index": 3,
+          "active": false,
+          "imageUrl": ""
+        }
+      ]
+    },
+    {
+      "id": "upperBody",
+      "title_en": "Upper body",
+      "title_vi": "Than tren",
+      "description_en": "Upper-body exercises grouped by push and pull.",
+      "index": 4,
+      "description_vi": "Bai tap than tren theo nhom day va keo.",
+      "active": true,
+      "groups": [
+        {
+          "id": "lats",
+          "imageUrl": "",
+          "active": false,
+          "index": 1,
+          "title_vi": "Co xo",
+          "title_en": "Lats"
+        },
+        {
+          "id": "push",
+          "imageUrl": "",
+          "index": 1,
+          "active": true,
+          "title_en": "Push",
+          "title_vi": "Push",
+          "items": [
+            {
+              "id": "regular",
+              "sets": 3,
+              "description_en": "Builds pushing strength through the chest, shoulders, and triceps.",
+              "title_vi": "Regular",
+              "reps": "8-12",
+              "targetMuscles": [
+                "chest",
+                "deltoids",
+                "triceps"
+              ],
+              "title_en": "Regular",
+              "level": "beginner",
+              "description_vi": "Builds pushing strength through the chest, shoulders, and triceps.",
+              "videoShortUrl": "https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Fupper-body%2Fpush%2Fregular.mp4?alt=media&token=6708fa3f-5a6a-4ace-bcb4-d4f0ffc327bc",
+              "index": 1,
+              "imageUrl": "",
+              "active": true,
+              "targetJoints": [
+                "shoulders",
+                "elbows",
+                "wrists"
+              ],
+              "durationSeconds": 0,
+              "equipment": [
+                "none"
+              ]
+            },
+            {
+              "id": "diamond",
+              "level": "beginner",
+              "description_vi": "Uses a narrow hand position to emphasize triceps and chest strength.",
+              "videoShortUrl": "https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Fupper-body%2Fpush%2Fdiamond.mp4?alt=media&token=c08d7f2c-2dd7-403e-9d82-c51ffefa8985",
+              "targetMuscles": [
+                "triceps",
+                "chest"
+              ],
+              "title_en": "Diamond",
+              "reps": "6-10",
+              "title_vi": "Diamond",
+              "sets": 3,
+              "description_en": "Uses a narrow hand position to emphasize triceps and chest strength.",
+              "equipment": [
+                "none"
+              ],
+              "targetJoints": [
+                "shoulders",
+                "elbows",
+                "wrists"
+              ],
+              "durationSeconds": 0,
+              "active": true,
+              "index": 2,
+              "imageUrl": ""
+            },
+            {
+              "id": "pike",
+              "description_en": "Shifts more load to the shoulders for overhead pushing strength.",
+              "sets": 3,
+              "reps": "6-10",
+              "title_vi": "Pike",
+              "targetMuscles": [
+                "deltoids",
+                "triceps",
+                "traps"
+              ],
+              "title_en": "Pike",
+              "videoShortUrl": "https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Fupper-body%2Fpush%2Fpike.mp4?alt=media&token=57f69b1e-68a4-4ed6-b5d3-50b8ed2b2937",
+              "description_vi": "Shifts more load to the shoulders for overhead pushing strength.",
+              "level": "beginner",
+              "imageUrl": "",
+              "index": 3,
+              "active": true,
+              "targetJoints": [
+                "shoulders",
+                "elbows",
+                "wrists"
+              ],
+              "durationSeconds": 0,
+              "equipment": [
+                "none"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "pull",
+          "active": true,
+          "index": 2,
+          "imageUrl": "",
+          "title_vi": "Pull",
+          "title_en": "Pull",
+          "items": [
+            {
+              "id": "pullUp",
+              "videoShortUrl": "https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Fupper-body%2Fpull%2Fpull-up.mp4?alt=media&token=0438e6a9-68d5-4cd2-80ab-b98c09251e17",
+              "durationSeconds": 0,
+              "reps": "3-8",
+              "imageUrl": "",
+              "description_en": "Builds vertical pulling strength for the lats, arms, and grip.",
+              "description_vi": "Builds vertical pulling strength for the lats, arms, and grip.",
+              "active": true,
+              "sets": 3,
+              "index": 1,
+              "level": "beginner",
+              "title_vi": "Pull up",
+              "equipment": [
+                "none"
+              ],
+              "targetMuscles": [
+                "lats",
+                "biceps",
+                "forearm"
+              ],
+              "targetJoints": [
+                "shoulders",
+                "elbows",
+                "wrists"
+              ],
+              "title_en": "Pull up"
+            },
+            {
+              "id": "row",
+              "targetJoints": [
+                "shoulders",
+                "elbows"
+              ],
+              "title_en": "Row",
+              "equipment": [
+                "none"
+              ],
+              "title_vi": "Row",
+              "targetMuscles": [
+                "lats",
+                "traps",
+                "biceps"
+              ],
+              "sets": 3,
+              "index": 2,
+              "level": "beginner",
+              "imageUrl": "",
+              "description_en": "Builds horizontal pulling strength through the back and arms.",
+              "active": true,
+              "description_vi": "Builds horizontal pulling strength through the back and arms.",
+              "videoShortUrl": "https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Fupper-body%2Fpull%2Frow.mp4?alt=media&token=fa4a35d3-9301-4d2f-ac44-6e8598d0c64f",
+              "durationSeconds": 0,
+              "reps": "8-12"
+            },
+            {
+              "id": "chinUp",
+              "reps": "3-8",
+              "durationSeconds": 0,
+              "videoShortUrl": "https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Fupper-body%2Fpull%2Fchin-up.mp4?alt=media&token=78f6e0dd-adaa-4f84-9cde-99da3e7eb3f8",
+              "description_en": "Uses an underhand grip to emphasize biceps and lats.",
+              "imageUrl": "",
+              "active": true,
+              "description_vi": "Uses an underhand grip to emphasize biceps and lats.",
+              "index": 3,
+              "sets": 3,
+              "level": "beginner",
+              "equipment": [
+                "none"
+              ],
+              "title_vi": "Chin up",
+              "targetMuscles": [
+                "biceps",
+                "lats",
+                "forearm"
+              ],
+              "targetJoints": [
+                "shoulders",
+                "elbows",
+                "wrists"
+              ],
+              "title_en": "Chin up"
+            }
+          ]
+        },
+        {
+          "id": "traps",
+          "imageUrl": "",
+          "active": false,
+          "index": 2,
+          "title_vi": "Cau vai",
+          "title_en": "Traps"
+        },
+        {
+          "id": "neck",
+          "index": 3,
+          "active": false,
+          "imageUrl": "",
+          "title_vi": "Co",
+          "title_en": "Neck"
+        },
+        {
+          "id": "deltoids",
+          "imageUrl": "",
+          "active": false,
+          "index": 4,
+          "title_vi": "Co vai",
+          "title_en": "Deltoids"
+        },
+        {
+          "id": "chest",
+          "imageUrl": "",
+          "active": false,
+          "index": 5,
+          "title_vi": "Co nguc",
+          "title_en": "Chest"
+        },
+        {
+          "id": "biceps",
+          "title_vi": "Tay truoc",
+          "title_en": "Biceps",
+          "index": 6,
+          "active": false,
+          "imageUrl": ""
+        },
+        {
+          "id": "triceps",
+          "index": 7,
+          "active": false,
+          "imageUrl": "",
+          "title_vi": "Tay sau",
+          "title_en": "Triceps"
+        },
+        {
+          "id": "forearm",
+          "index": 8,
+          "active": false,
+          "imageUrl": "",
+          "title_vi": "Cang tay",
+          "title_en": "Forearm"
+        }
+      ]
+    },
+    {
+      "id": "coolDown",
+      "active": true,
+      "description_vi": "Cac bai tap lam diu va mo khop sau buoi tap.",
+      "index": 5,
+      "title_vi": "Cool down",
+      "title_en": "Cool down",
+      "description_en": "Joint-focused exercises to cool down and restore mobility after training.",
+      "groups": [
+        {
+          "id": "joints",
+          "active": true,
+          "index": 1,
+          "imageUrl": "",
+          "title_en": "Joints",
+          "title_vi": "Joints",
+          "items": [
+            {
+              "id": "overheadRod",
+              "active": true,
+              "index": 1,
+              "impact_en": "Shoulder mobility",
+              "imageUrl": "",
+              "equipment": [
+                "none"
+              ],
+              "durationSeconds": 30,
+              "targetJoints": [
+                "shoulders"
+              ],
+              "reps": "",
+              "title_vi": "Overhead rod",
+              "sets": 1,
+              "description_en": "Opens the shoulders with a controlled overhead position.",
+              "description_vi": "Opens the shoulders with a controlled overhead position.",
+              "level": "beginner",
+              "videoShortUrl": "https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Fcool-down%2Foverhead-rod.mp4?alt=media&token=d25381f9-96cc-4879-9c89-d2901c73f6e3",
+              "impact_vi": "Shoulder mobility",
+              "title_en": "Overhead rod",
+              "targetMuscles": []
+            },
+            {
+              "id": "bridge",
+              "level": "beginner",
+              "description_vi": "Extends the front body and mobilizes wrists, elbows, shoulders, spine, and hips.",
+              "impact_vi": "Wrist, Elbow, Shoulder, Spine, Hip",
+              "videoShortUrl": "https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Fcool-down%2Fbridge.mp4?alt=media&token=4ca6d4ed-660d-4417-b4ed-272553a88449",
+              "targetMuscles": [],
+              "title_en": "Bridge",
+              "title_vi": "Bridge",
+              "reps": "",
+              "sets": 1,
+              "description_en": "Extends the front body and mobilizes wrists, elbows, shoulders, spine, and hips.",
+              "equipment": [
+                "none"
+              ],
+              "targetJoints": [
+                "wrists",
+                "elbows",
+                "shoulders",
+                "spine",
+                "hips"
+              ],
+              "durationSeconds": 30,
+              "active": true,
+              "impact_en": "Wrist, Elbow, Shoulder, Spine, Hip",
+              "index": 2,
+              "imageUrl": ""
+            },
+            {
+              "id": "catCow",
+              "description_vi": "Moves the spine and hips through gentle flexion and extension.",
+              "level": "beginner",
+              "impact_vi": "Spine, Hip",
+              "videoShortUrl": "https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Fcool-down%2Fcat-cow.mp4?alt=media&token=33a6ef36-0eeb-4b28-8cbd-2f01358a9da0",
+              "targetMuscles": [],
+              "title_en": "Catcow",
+              "title_vi": "Catcow",
+              "reps": "",
+              "sets": 1,
+              "description_en": "Moves the spine and hips through gentle flexion and extension.",
+              "equipment": [
+                "none"
+              ],
+              "targetJoints": [
+                "spine",
+                "hips"
+              ],
+              "durationSeconds": 30,
+              "active": true,
+              "index": 3,
+              "impact_en": "Spine, Hip",
+              "imageUrl": ""
+            },
+            {
+              "id": "downDog",
+              "title_en": "DownDog",
+              "targetMuscles": [],
+              "videoShortUrl": "https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Fcool-down%2Fdown-dog.mp4?alt=media&token=9ec43fcd-ac7e-4cfd-9ce7-9f615e8a82e0",
+              "impact_vi": "Shoulder, Hip, Spine",
+              "level": "beginner",
+              "description_vi": "Lengthens the shoulders, hips, and spine after training.",
+              "description_en": "Lengthens the shoulders, hips, and spine after training.",
+              "sets": 1,
+              "title_vi": "DownDog",
+              "reps": "",
+              "durationSeconds": 30,
+              "targetJoints": [
+                "shoulders",
+                "hips",
+                "spine"
+              ],
+              "equipment": [
+                "none"
+              ],
+              "imageUrl": "",
+              "impact_en": "Shoulder, Hip, Spine",
+              "index": 4,
+              "active": true
+            },
+            {
+              "id": "squat",
+              "equipment": [
+                "none"
+              ],
+              "targetJoints": [
+                "hips"
+              ],
+              "durationSeconds": 30,
+              "active": true,
+              "index": 5,
+              "impact_en": "Hip",
+              "imageUrl": "",
+              "description_vi": "Uses a relaxed deep squat to open the hips.",
+              "level": "beginner",
+              "impact_vi": "Hip",
+              "videoShortUrl": "https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Fcool-down%2Fsquat.mp4?alt=media&token=53958c21-dc40-45f8-91cc-e658545f403c",
+              "targetMuscles": [],
+              "title_en": "Squat",
+              "reps": "",
+              "title_vi": "Squat",
+              "sets": 1,
+              "description_en": "Uses a relaxed deep squat to open the hips."
+            },
+            {
+              "id": "lunge",
+              "equipment": [
+                "none"
+              ],
+              "durationSeconds": 30,
+              "targetJoints": [
+                "knees",
+                "ankles"
+              ],
+              "active": true,
+              "imageUrl": "",
+              "impact_en": "Knee, Ankle",
+              "index": 6,
+              "videoShortUrl": "https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Fcool-down%2Flunge.mp4?alt=media&token=e3cb23c9-ae9a-4346-9917-d0a7decb7c1c",
+              "impact_vi": "Knee, Ankle",
+              "level": "beginner",
+              "description_vi": "Mobilizes the knee and ankle through a comfortable lunge position.",
+              "title_en": "Lunge",
+              "targetMuscles": [],
+              "title_vi": "Lunge",
+              "reps": "",
+              "description_en": "Mobilizes the knee and ankle through a comfortable lunge position.",
+              "sets": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "routine",
+      "title_vi": "Routine",
+      "title_en": "Routine",
+      "days": [
+        {
+          "title_en": "Upper (push day)",
+          "title_vi": "Upper (push day)",
+          "items": [
+            "Pike pushup",
+            "Regular pushup",
+            "Diamond pushup"
+          ],
+          "index": 1,
+          "label_en": "2",
+          "key": "day2",
+          "label_vi": "2",
+          "prescription": {
+            "set": 3,
+            "rep": "5-10 Reps",
+            "rest": "120s"
+          }
+        },
+        {
+          "prescription": {
+            "rest": "60s",
+            "set": 3,
+            "rep": "60s"
+          },
+          "label_vi": "3",
+          "key": "day3",
+          "index": 2,
+          "items": [
+            "Regular-Long plank or hollow body",
+            "Each Side plank",
+            "Arch Up"
+          ],
+          "label_en": "3",
+          "title_en": "Core",
+          "title_vi": "Core"
+        },
+        {
+          "prescription": {
+            "rep": "10 Reps",
+            "set": 3,
+            "rest": "60s"
+          },
+          "label_vi": "4",
+          "key": "day4",
+          "label_en": "4",
+          "index": 3,
+          "items": [
+            "Quad Bulgarian split",
+            "Glute bridge",
+            "Single Calf raise"
+          ],
+          "title_vi": "Lower",
+          "title_en": "Lower"
+        },
+        {
+          "label_vi": "5",
+          "prescription": {
+            "set": 3,
+            "rep": "30s",
+            "rest": ""
+          },
+          "title_vi": "Joints",
+          "title_en": "Joints",
+          "label_en": "5",
+          "items": [
+            "Overhead rod",
+            "Bridge",
+            "DownDog",
+            "Deep squat",
+            "Lunge",
+            "catcow"
+          ],
+          "index": 4,
+          "key": "day5"
+        },
+        {
+          "label_vi": "6",
+          "prescription": {
+            "set": 3,
+            "rep": "5-10 Reps",
+            "rest": "120s"
+          },
+          "title_vi": "Upper (pull day)",
+          "title_en": "Upper (pull day)",
+          "index": 5,
+          "items": [
+            "Pull up",
+            "Row (table, chair)",
+            "chin up"
+          ],
+          "label_en": "6",
+          "key": "day6"
+        },
+        {
+          "key": "day7",
+          "title_vi": "Rest",
+          "title_en": "Rest",
+          "restLabel_en": "Rest",
+          "label_vi": "7",
+          "restLabel_vi": "Rest",
+          "label_en": "7",
+          "items": [],
+          "index": 6,
+          "rest": true
+        },
+        {
+          "title_vi": "Handstand training",
+          "title_en": "Handstand training",
+          "index": 7,
+          "items": [
+            "Back to wall",
+            "Face to wall",
+            "Exit",
+            "Free"
+          ],
+          "label_en": "Sunday",
+          "key": "sunday",
+          "label_vi": "Sunday",
+          "prescription": {
+            "rest": "60s",
+            "rep": "30s",
+            "set": 3
+          }
+        }
+      ],
+      "active": true,
+      "caption_en": "Day",
+      "description_vi": "Lich tap 1 tuan voi ngay day, core, chan, khop, keo va nghi.",
+      "index": 6,
+      "description_en": "A weekly training schedule for push, core, lower body, joints, pull, and rest days.",
+      "caption_vi": "Ngay"
+    },
+    {
+      "id": "freeHandstand",
+      "active": true,
+      "title_vi": "Bai tap cho trong chuoi tu do",
+      "title_en": "Exercises for Free Handstand",
+      "description_en": "Specific technique exercises for free handstand training.",
+      "index": 7,
+      "description_vi": "Cac bai tap ky thuat rieng cho handstand tu do.",
+      "groups": [
+        {
+          "id": "technique",
+          "active": true,
+          "title_vi": "Ky thuat",
+          "imageUrl": "",
+          "title_en": "Technique",
+          "index": 1,
+          "items": [
+            {
+              "id": "warmUpJoints",
+              "sets": 3,
+              "VideoLandScreen": "QCiBnoNiypU",
+              "reps": "",
+              "index": 1,
+              "description_vi": "Lam nong khop truoc khi tap trong chuoi.",
+              "active": true,
+              "imageUrl": "",
+              "steps": [
+                {
+                  "duration": 5,
+                  "instruction": "Warm up preparation"
+                }
+              ],
+              "targetMuscles": [
+                "deltoids",
+                "forearm"
+              ],
+              "videoLandscapeUrl": "QCiBnoNiypU",
+              "videoShortUrl": "",
+              "targetJoints": [
+                "wrists",
+                "shoulders"
+              ],
+              "description_en": "Warms up joints before handstand training.",
+              "VideoPortraitScreen": "iHI3LerTZWE",
+              "level": "beginner",
+              "durationSeconds": 30,
+              "videoPortraitUrl": "iHI3LerTZWE",
+              "equipment": [
+                "none"
+              ],
+              "title_en": "Joint warm-up",
+              "title_vi": "Lam nong khop"
+            },
+            {
+              "id": "faceToWall",
+              "videoLandscapeUrl": "maRWwfXfuAs",
+              "targetMuscles": [
+                "deltoids",
+                "traps",
+                "abs"
+              ],
+              "sets": 3,
+              "VideoLandScreen": "maRWwfXfuAs",
+              "reps": "",
+              "index": 2,
+              "description_vi": "Tap vi tri than nguoi thang va duong vai tot.",
+              "imageUrl": "",
+              "active": true,
+              "steps": [
+                {
+                  "duration": 5,
+                  "instruction": "Face to wall position"
+                }
+              ],
+              "durationSeconds": 30,
+              "equipment": [
+                "wall"
+              ],
+              "videoPortraitUrl": "1GmZJBZAX8g",
+              "title_en": "Face to wall",
+              "title_vi": "Mat doi dien tuong",
+              "videoShortUrl": "",
+              "targetJoints": [
+                "wrists",
+                "shoulders"
+              ],
+              "description_en": "Trains a straight body line and good shoulder position.",
+              "VideoPortraitScreen": "1GmZJBZAX8g",
+              "level": "beginner"
+            },
+            {
+              "id": "backToWall",
+              "title_en": "Back to wall",
+              "title_vi": "Lung doi dien tuong",
+              "durationSeconds": 30,
+              "equipment": [
+                "wall"
+              ],
+              "videoPortraitUrl": "HpvbeaXU8LU",
+              "VideoPortraitScreen": "HpvbeaXU8LU",
+              "level": "beginner",
+              "description_en": "Builds upside-down awareness and body control.",
+              "targetJoints": [
+                "wrists",
+                "shoulders"
+              ],
+              "videoShortUrl": "",
+              "videoLandscapeUrl": "7AcBcTZ7f2I",
+              "targetMuscles": [
+                "deltoids",
+                "traps",
+                "abs"
+              ],
+              "index": 3,
+              "description_vi": "Tap cam giac dao nguoc va kiem soat than nguoi.",
+              "imageUrl": "",
+              "active": true,
+              "steps": [
+                {
+                  "duration": 5,
+                  "instruction": "Back to wall position"
+                }
+              ],
+              "reps": "",
+              "sets": 3,
+              "VideoLandScreen": "7AcBcTZ7f2I"
+            },
+            {
+              "id": "exitHandstand",
+              "videoLandscapeUrl": "CriqdzsrZnM",
+              "targetMuscles": [
+                "deltoids",
+                "abs",
+                "forearm"
+              ],
+              "index": 4,
+              "description_vi": "Tap cach thoat the an toan khi mat thang bang.",
+              "imageUrl": "",
+              "active": true,
+              "steps": [
+                {
+                  "duration": 5,
+                  "instruction": "Exit safely from handstand"
+                }
+              ],
+              "reps": "",
+              "sets": 3,
+              "VideoLandScreen": "CriqdzsrZnM",
+              "title_en": "Exit handstand",
+              "title_vi": "Thoat trong chuoi",
+              "durationSeconds": 30,
+              "videoPortraitUrl": "dRnJIdZE4q0",
+              "equipment": [
+                "none"
+              ],
+              "VideoPortraitScreen": "dRnJIdZE4q0",
+              "level": "beginner",
+              "description_en": "Practices a safe exit when balance is lost.",
+              "targetJoints": [
+                "wrists",
+                "shoulders",
+                "hips"
+              ],
+              "videoShortUrl": ""
+            },
+            {
+              "id": "freeHandstand",
+              "videoLandscapeUrl": "wwQdLa811iE",
+              "targetMuscles": [
+                "deltoids",
+                "traps",
+                "abs",
+                "forearm"
+              ],
+              "reps": "",
+              "index": 5,
+              "description_vi": "Tap thang bang khong dua vao tuong.",
+              "imageUrl": "",
+              "active": true,
+              "steps": [
+                {
+                  "duration": 5,
+                  "instruction": "Balance without wall support"
+                }
+              ],
+              "sets": 3,
+              "VideoLandScreen": "wwQdLa811iE",
+              "title_en": "Free handstand",
+              "title_vi": "Trong chuoi tu do",
+              "durationSeconds": 30,
+              "videoPortraitUrl": "TQpJQFZwAsg",
+              "equipment": [
+                "none"
+              ],
+              "description_en": "Practices balance without wall support.",
+              "VideoPortraitScreen": "TQpJQFZwAsg",
+              "level": "beginner",
+              "videoShortUrl": "",
+              "targetJoints": [
+                "wrists",
+                "shoulders"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "other": [
+    {
+      "id": "rbrEEcmNUtaW9RELe0Vm",
+      "title": "Làm gì khi điện thoại Samsung bị quên mật khẩu!",
+      "title_en": "What to do if you forgot your Samsung phone password!",
+      "title_vi": "Làm gì khi điện thoại Samsung bị quên mật khẩu!",
+      "content_vi": "Phần mềm cần thiết:\n1. Odin: Công cụ trên Windows để \"flash\" phần mềm gốc (firmware).\n2. Frija (từ GitHub): Tải trực tiếp firmware từ server Samsung bằng API chính thức (tốc độ cao & miễn phí).\n\nCấu trúc Firmware gồm 4 file chính:\n- BL (Bootloader): Khởi động máy.\n- AP (System): Hệ điều hành Android chính.\n- CP (Modem): Quản lý sóng, mạng.\n- CSC: Vùng/quốc gia + Xóa sạch dữ liệu (Dùng để phá mật khẩu).\n- HOME_CSC: Giữ lại dữ liệu (Không khuyến khích khi cần xóa pass).\n\nCác bước thực hiện:\n- Tìm phím cứng (thường là Nguồn + Giảm âm lượng + Bixby/Home) để vào Download Mode.\n- Cài đặt Samsung USB Driver và .NET Framework trên máy tính.\n- Chuẩn bị thông tin máy: Mã loại (Model), IMEI, S/N để tải đúng bản firmware.\n- Mở Odin, kết nối điện thoại (hiện cổng COM màu xanh là nhận).\n- Load 4 file đúng vị trí, nhấn Start. Đợi khoảng 2 phút hiện chữ PASS là thành công.",
+      "index": "1",
+      "content": "Phần mềm cần thiết:\n1. Odin: Công cụ trên Windows để \"flash\" phần mềm gốc (firmware).\n2. Frija (từ GitHub): Tải trực tiếp firmware từ server Samsung bằng API chính thức (tốc độ cao & miễn phí).\n\nCấu trúc Firmware gồm 4 file chính:\n- BL (Bootloader): Khởi động máy.\n- AP (System): Hệ điều hành Android chính.\n- CP (Modem): Quản lý sóng, mạng.\n- CSC: Vùng/quốc gia + Xóa sạch dữ liệu (Dùng để phá mật khẩu).\n- HOME_CSC: Giữ lại dữ liệu (Không khuyến khích khi cần xóa pass).\n\nCác bước thực hiện:\n- Tìm phím cứng (thường là Nguồn + Giảm âm lượng + Bixby/Home) để vào Download Mode.\n- Cài đặt Samsung USB Driver và .NET Framework trên máy tính.\n- Chuẩn bị thông tin máy: Mã loại (Model), IMEI, S/N để tải đúng bản firmware.\n- Mở Odin, kết nối điện thoại (hiện cổng COM màu xanh là nhận).\n- Load 4 file đúng vị trí, nhấn Start. Đợi khoảng 2 phút hiện chữ PASS là thành công.",
+      "content_en": "Required software:\n1. Odin: A Windows tool used to flash stock firmware.\n2. Frija (from GitHub): Downloads firmware directly from Samsung servers via the official API (fast & free).\n\nFirmware structure includes 4 main files:\n- BL (Bootloader): Responsible for device startup.\n- AP (System): The main Android operating system.\n- CP (Modem): Handles network and connectivity.\n- CSC: Region/country + full data wipe (used for removing password).\n- HOME_CSC: Keeps user data (not recommended when removing password).\n\nSteps:\n- Press hardware buttons (usually Power + Volume Down + Bixby/Home) to enter Download Mode.\n- Install Samsung USB Driver and .NET Framework on your computer.\n- Prepare device information: Model, IMEI, S/N to download the correct firmware.\n- Open Odin and connect the phone (a blue COM port means it’s detected).\n- Load the 4 files into the correct slots, press Start. Wait about 2 minutes until \"PASS\" appears."
+    }
+  ],
+  "programs": [
+    {
+      "id": "beginnerStrength",
+      "description_en": "A combined program for quickly building shoulder, core, leg, and wrist strength.",
+      "imageUrl": "",
+      "goal": "strength",
+      "description_vi": "Giao an to hop giup tang suc manh vai, core, chan va co tay.",
+      "index": 1,
+      "frequencyPerWeek": 4,
+      "title_vi": "Lich tap lam khoe co nhanh",
+      "title_en": "Fast strength program",
+      "level": "beginner",
+      "exerciseRefs": [
+        {
+          "reps": "45 seconds",
+          "order": 1,
+          "path": "exercises/warmup/groups/general/items/jumpingJack",
+          "sets": 2
+        },
+        {
+          "path": "exercises/warmup/groups/general/items/skippingRun",
+          "sets": 2,
+          "reps": "45 seconds",
+          "order": 2
+        },
+        {
+          "order": 3,
+          "reps": "12-15",
+          "sets": 3,
+          "path": "exercises/lowerBody/groups/glute/items/gluteBridge"
+        },
+        {
+          "sets": 3,
+          "path": "exercises/freeHandstand/groups/technique/items/faceToWall",
+          "order": 4,
+          "reps": "20-30 seconds"
+        }
+      ],
+      "active": true,
+      "estimatedMinutes": 25
+    },
+    {
+      "id": "freeHandstandFoundation",
+      "index": 2,
+      "description_vi": "Giao an to hop de xay dung duong thang, vai, core va thoat the an toan.",
+      "goal": "free_handstand",
+      "imageUrl": "",
+      "description_en": "A combined program for line work, shoulders, core, and safe exits.",
+      "frequencyPerWeek": 3,
+      "title_en": "Free handstand foundation program",
+      "title_vi": "Giao an nen tang trong chuoi tu do",
+      "estimatedMinutes": 30,
+      "level": "beginner",
+      "active": true,
+      "exerciseRefs": [
+        {
+          "path": "exercises/freeHandstand/groups/technique/items/warmUpJoints",
+          "sets": 1,
+          "reps": "45 seconds",
+          "order": 1
+        },
+        {
+          "order": 2,
+          "reps": "20-30 seconds",
+          "sets": 3,
+          "path": "exercises/freeHandstand/groups/technique/items/faceToWall"
+        },
+        {
+          "reps": "20-30 seconds",
+          "order": 3,
+          "path": "exercises/freeHandstand/groups/technique/items/backToWall",
+          "sets": 3
+        },
+        {
+          "reps": "5-8 reps",
+          "order": 4,
+          "path": "exercises/freeHandstand/groups/technique/items/exitHandstand",
+          "sets": 3
+        },
+        {
+          "path": "exercises/freeHandstand/groups/technique/items/freeHandstand",
+          "sets": 3,
+          "reps": "10-20 seconds",
+          "order": 5
+        }
+      ]
+    }
+  ]
+}

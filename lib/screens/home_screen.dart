@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import '../models/exercise.dart';
-import 'exercise_detail_screen.dart';
-import 'about_screen.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../services/progress_service.dart';
-import 'dart:async';
-import 'StepFinalScreen.dart';
+
+import '../data/routine_service.dart';
+import '../models/routine.dart';
+import 'routine_session_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,319 +12,432 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
-  Timer? _timer;
-
-  bool isWarmupValid = false;
-  Set<String> completedSteps = {};
+  final RoutineService _routineService = RoutineService();
+  late Future<RoutinePlan> _planFuture;
 
   @override
   void initState() {
     super.initState();
-
-    loadWarmupStatus();
-    loadProgress();
-
-_timer = Timer.periodic(const Duration(seconds: 1), (_) async {
-  final valid = await ProgressService.isWarmupValid();
-
-  if (valid != isWarmupValid) {
-    setState(() {
-      isWarmupValid = valid;
-    });
-  }
-});
-  }
-
-
-  Future<void> loadWarmupStatus() async {
-    final valid = await ProgressService.isWarmupValid();
-
-    setState(() {
-      isWarmupValid = valid;
-    });
-  }
-
-  Future<void> loadProgress() async {
-    final list = await ProgressService.getCompleted();
-
-    setState(() {
-      completedSteps = list.toSet();
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
+    _planFuture = _routineService.loadPlan();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-
+      backgroundColor: const Color(0xFF101214),
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: const Color(0xFF101214),
         elevation: 0,
-        title: const Text("Handstand Training",
-            style: TextStyle(      
-              color: Colors.white, // 🔥 FIX HERE
-              fontWeight: FontWeight.bold,
-              fontSize: 20,)
-        ),
         centerTitle: true,
-        iconTheme: const IconThemeData(
-          color: Colors.white, // 🔥 icons also white
+        title: const Text(
+          'Weekly Routine',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const AboutScreen()),
-              );
-            },
-          ),
-
-        ],
       ),
-
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('HandStand')
-            .orderBy('order')
-            .snapshots(),
+      body: FutureBuilder<RoutinePlan>(
+        future: _planFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}"));
+            return _MessageState(
+              icon: Icons.cloud_off,
+              title: 'Could not load routine',
+              message: snapshot.error.toString(),
+              actionLabel: 'Try Again',
+              onAction: () {
+                setState(() {
+                  _planFuture = _routineService.loadPlan();
+                });
+              },
+            );
           }
 
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text("No exercises found"));
+          final plan = snapshot.data;
+          if (plan == null || plan.days.isEmpty) {
+            return const _MessageState(
+              icon: Icons.event_busy,
+              title: 'No routine found',
+              message: 'Add a routine document in Firebase to start training.',
+            );
           }
 
-          final exercises = snapshot.data!.docs.map((doc) {
-            return Exercise.fromFirestore(
-                doc.id, doc.data() as Map<String, dynamic>);
-          }).toList();
+          final today = plan.today;
+          final steps = _routineService.buildSessionSteps(
+            today,
+            plan.exerciseItems,
+          );
 
-          exercises.sort((a, b) => a.order.compareTo(b.order));
-
-          final totalSteps = exercises.length;
-          final doneSteps = completedSteps.length;
-          final progress =
-              totalSteps == 0 ? 0.0 : doneSteps / totalSteps;
-
-          return Column(
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             children: [
-
-              // 🔥 HEADER (GRADIENT + PROGRESS)
-              Container(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Color(0xFF0F2027),
-                      Color(0xFF203A43),
-                      Color(0xFF2C5364),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "$doneSteps / $totalSteps completed",
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: LinearProgressIndicator(
-                        value: progress,
-                        minHeight: 10,
-                        backgroundColor: Colors.white24,
-                        valueColor: const AlwaysStoppedAnimation(
-                          Color(0xFF00E676),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // 🔥 LIST
-              Expanded(
-                child: ListView.builder(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.only(top: 10, bottom: 16),
-                  itemCount: exercises.length,
-                  itemBuilder: (context, index) {
-                    final exercise = exercises[index];
-                    final isFinalStep = exercise.id == "FinalMessage";
-                    final prevStepGood =
-                        completedSteps.contains("step_${index - 1}");
-
-                    final isLocked =
-                        index > 0 && (!isWarmupValid || !prevStepGood);
-
-                    return FutureBuilder<Map<String, int>>(
-                      future: ProgressService.getFeedback(index),
-                      builder: (context, snapshot) {
-                        final good = snapshot.data?["good"] ?? 0;
-                        final bad = snapshot.data?["bad"] ?? 0;
-
-                        return GestureDetector(
- onTap: () async {
-  // 🔒 LOCK logic
-  if (isLocked) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Complete warm-up & previous step first"),
-      ),
-    );
-    return;
-  }
-
-  // ✅ FINAL STEP
-  if (isFinalStep) {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const StepFinalScreen(),
-      ),
-    );
-    return;
-  }
-
-  // 👉 NORMAL STEP
-  await Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => ExerciseDetailScreen(
-        exercise: exercise,
-        index: index,
-      ),
-    ),
-  );
-
-  await loadProgress();
-  await loadWarmupStatus();
-  setState(() {}); // 🔥 IMPORTANT: force rebuild list + FutureBuilder
-},
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 12),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF1E1E1E),
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                            child: Row(
-                              children: [
-
-                                // 🔥 STEP CIRCLE
-Container(
-  width: 40,
-  height: 40,
-  decoration: BoxDecoration(
-    color: isFinalStep
-        ? Colors.orange
-        : (isLocked ? Colors.grey : const Color(0xFF00E676)),
-    shape: BoxShape.circle,
-  ),
-                                  child: Center(
-                                    child: Text(
-                                      "${index + 1}",
-                                      style: const TextStyle(
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-
-                                const SizedBox(width: 14),
-
-                                // 🔥 TEXT
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-Text(
-  isFinalStep ? "🏁 Final Challenge" : exercise.title,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-if (isFinalStep)
-  FutureBuilder<Map<String, int>>(
-    future: ProgressService.getTotals(),
-    builder: (context, snapshot) {
-      final good = snapshot.data?["good"] ?? 0;
-      final bad = snapshot.data?["practice"] ?? 0;
-      final total = snapshot.data?["total"] ?? 0;
-
-      return Text(
-        "👍 $good   😓 $bad   🔁 $total",
-        style: const TextStyle(
-          color: Colors.white54,
-          fontSize: 12,
-        ),
-      );
-    },
-  )
-else
-Text(
-  isLocked
-      ? "🔒 Locked   👍 $good   😓 $bad"
-      : "👍 $good   😓 $bad",
-  style: TextStyle(
-    color: isLocked ? Colors.white38 : Colors.white54,
-    fontSize: 12,
-  ),
-),
-                                    ],
-                                  ),
-                                ),
-
-Icon(
-  isFinalStep
-      ? Icons.emoji_events
-      : (isLocked ? Icons.lock : Icons.play_arrow),
-  color: isLocked ? Colors.white38 : Colors.white70,
-  size: 18,
-),
-                              ],
-                            ),
+              _TodayHeader(day: today),
+              const SizedBox(height: 16),
+              _WeekTable(days: plan.days, today: today),
+              const SizedBox(height: 18),
+              _TodayWorkoutCard(
+                day: today,
+                steps: steps,
+                onStart: today.isRestDay || steps.isEmpty
+                    ? null
+                    : () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                RoutineSessionScreen(day: today, steps: steps),
                           ),
                         );
                       },
-                    );
-                  },
-                ),
               ),
             ],
           );
         },
       ),
+    );
+  }
+}
 
+class _TodayHeader extends StatelessWidget {
+  const _TodayHeader({required this.day});
+
+  final RoutineDay day;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1B1F22),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.white10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Today',
+            style: TextStyle(color: Colors.white54, fontSize: 13),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            day.title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            day.isRestDay
+                ? 'Rest and recover.'
+                : '${day.sets} sets • ${day.rep} • Rest ${day.restSeconds}s',
+            style: const TextStyle(color: Colors.white70, fontSize: 15),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WeekTable extends StatelessWidget {
+  const _WeekTable({required this.days, required this.today});
+
+  final List<RoutineDay> days;
+  final RoutineDay today;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF171A1D),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.white12),
+      ),
+      child: Column(
+        children: [
+          const Padding(
+            padding: EdgeInsets.fromLTRB(14, 14, 14, 8),
+            child: Row(
+              children: [
+                Icon(Icons.calendar_month, color: Colors.orange, size: 20),
+                SizedBox(width: 8),
+                Text(
+                  'Week Plan',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.fromLTRB(12, 6, 12, 14),
+            child: Row(
+              children: [
+                for (final day in days)
+                  _DayColumn(day: day, selected: day.index == today.index),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DayColumn extends StatelessWidget {
+  const _DayColumn({required this.day, required this.selected});
+
+  final RoutineDay day;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 132,
+      margin: const EdgeInsets.only(right: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: selected ? Colors.orange : const Color(0xFF22262A),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: selected ? Colors.orangeAccent : Colors.white10,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _weekdayLabel(day.index),
+            style: TextStyle(
+              color: selected ? Colors.black : Colors.white54,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            day.title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: selected ? Colors.black : Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              height: 1.2,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            day.isRestDay ? 'Rest' : day.items.join('\n'),
+            maxLines: 5,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: selected ? Colors.black87 : Colors.white60,
+              fontSize: 12,
+              height: 1.25,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _weekdayLabel(int index) {
+    return switch (index) {
+      1 => 'Mon',
+      2 => 'Tue',
+      3 => 'Wed',
+      4 => 'Thu',
+      5 => 'Fri',
+      6 => 'Sat',
+      7 => 'Sun',
+      _ => '',
+    };
+  }
+}
+
+class _TodayWorkoutCard extends StatelessWidget {
+  const _TodayWorkoutCard({
+    required this.day,
+    required this.steps,
+    required this.onStart,
+  });
+
+  final RoutineDay day;
+  final List<RoutineSessionStep> steps;
+  final VoidCallback? onStart;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1B1F22),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.white10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Today's Exercises",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 14),
+          if (day.isRestDay)
+            const Text(
+              'No exercises today.',
+              style: TextStyle(color: Colors.white70),
+            )
+          else if (steps.isEmpty)
+            const Text(
+              'No matching exercise items were found for today.',
+              style: TextStyle(color: Colors.white70),
+            )
+          else
+            for (var i = 0; i < steps.length; i++)
+              _WorkoutStepRow(index: i + 1, step: steps[i]),
+          const SizedBox(height: 18),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                foregroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(vertical: 15),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: onStart,
+              icon: const Icon(Icons.play_arrow),
+              label: const Text(
+                'Start Today Session',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WorkoutStepRow extends StatelessWidget {
+  const _WorkoutStepRow({required this.index, required this.step});
+
+  final int index;
+  final RoutineSessionStep step;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(
+              color: Colors.orange,
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              '$index',
+              style: const TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  step.title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  'Set ${step.setNumber}/${step.totalSets} • ${step.effortLabel}',
+                  style: const TextStyle(color: Colors.white54, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MessageState extends StatelessWidget {
+  const _MessageState({
+    required this.icon,
+    required this.title,
+    required this.message,
+    this.actionLabel,
+    this.onAction,
+  });
+
+  final IconData icon;
+  final String title;
+  final String message;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: Colors.white54, size: 52),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white60),
+            ),
+            if (actionLabel != null && onAction != null) ...[
+              const SizedBox(height: 18),
+              ElevatedButton(onPressed: onAction, child: Text(actionLabel!)),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }
