@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/routine_service.dart';
 import '../models/routine.dart';
+import 'premium_screen.dart';
 import 'routine_session_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -33,6 +34,19 @@ class _HomeScreenState extends State<HomeScreen> {
           'Weekly Routine',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
+        actions: [
+          IconButton(
+            tooltip: 'Premium',
+            color: Colors.orange,
+            icon: const Icon(Icons.workspace_premium),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const PremiumScreen()),
+              );
+            },
+          ),
+        ],
       ),
       body: FutureBuilder<RoutinePlan>(
         future: _planFuture,

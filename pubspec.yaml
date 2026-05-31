@@ -2,7 +2,7 @@ name: handstand_app
 description: "A new Flutter project."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.2+11 #apple store submit 27 5 2026
+version: 1.0.8+18 #ios subscription metadata fix 29 5 2026
 
 environment:
   sdk: ^3.11.0
@@ -20,6 +20,9 @@ dependencies:
   flutter_launcher_icons: ^0.14.4
   change_app_package_name: ^1.5.0
   shared_preferences: ^2.2.2
+  in_app_purchase: ^3.2.3
+  in_app_purchase_android: ^0.4.0+11
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:

@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'home_screen.dart';
+import 'premium_screen.dart';
 
 class PrerequisiteScreen extends StatefulWidget {
   const PrerequisiteScreen({super.key});
@@ -41,7 +41,9 @@ class _PrerequisiteScreenState extends State<PrerequisiteScreen> {
     if (!mounted) return;
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
+      MaterialPageRoute(
+        builder: (_) => const PremiumScreen(requirePurchase: true),
+      ),
     );
   }
 
