@@ -2,7 +2,7 @@ name: handstand_app
 description: "A new Flutter project."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.8+18 #ios subscription metadata fix 29 5 2026
+version: 1.0.9+20 # App Store Connect resubmission 31 5 2026
 
 environment:
   sdk: ^3.11.0
@@ -39,4 +39,9 @@ flutter:
 
   assets:
     - assets/
-    - assets/video/
+    - assets/video/HS-BackToWall.mp4
+    - assets/video/HS-Exit.mp4
+    - assets/video/HS-FaceToWall.mp4
+    - assets/video/HS-Free.mp4
+    - assets/video/HS-warmUp-Shoulder.mp4
+    - assets/video/HS-warmUp-wrist.mp4

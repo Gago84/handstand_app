@@ -29,6 +29,9 @@ class _PremiumScreenState extends State<PremiumScreen> {
   static final Uri _termsOfUseUri = Uri.parse(
     'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/',
   );
+  static final Uri _privacyPolicyUri = Uri.parse(
+    'https://banana-57559.web.app/privacy-policy.html',
+  );
 
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
   late final StreamSubscription<List<PurchaseDetails>> _purchaseSubscription;
@@ -307,7 +310,10 @@ class _PremiumScreenState extends State<PremiumScreen> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 10),
-              _LegalLinks(onOpenTerms: () => _openUrl(_termsOfUseUri)),
+              _LegalLinks(
+                onOpenPrivacy: () => _openUrl(_privacyPolicyUri),
+                onOpenTerms: () => _openUrl(_termsOfUseUri),
+              ),
             ],
           ),
         ),
@@ -317,22 +323,33 @@ class _PremiumScreenState extends State<PremiumScreen> {
 }
 
 class _LegalLinks extends StatelessWidget {
-  const _LegalLinks({required this.onOpenTerms});
+  const _LegalLinks({required this.onOpenPrivacy, required this.onOpenTerms});
 
+  final VoidCallback onOpenPrivacy;
   final VoidCallback onOpenTerms;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: TextButton(
-        style: TextButton.styleFrom(
-          foregroundColor: Colors.orange.shade200,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+    final style = TextButton.styleFrom(
+      foregroundColor: Colors.orange.shade200,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+    );
+
+    return Wrap(
+      alignment: WrapAlignment.center,
+      children: [
+        TextButton(
+          style: style,
+          onPressed: onOpenPrivacy,
+          child: const Text('Privacy Policy'),
         ),
-        onPressed: onOpenTerms,
-        child: const Text('Terms of Use (EULA)'),
-      ),
+        TextButton(
+          style: style,
+          onPressed: onOpenTerms,
+          child: const Text('Terms of Use (EULA)'),
+        ),
+      ],
     );
   }
 }

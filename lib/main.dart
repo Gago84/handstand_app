@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -52,7 +53,7 @@ class HandstandApp extends StatelessWidget {
       startScreen = const WelcomeScreen();
     } else if (!passedRequirements) {
       startScreen = const PrerequisiteScreen();
-    } else if (!premiumActive) {
+    } else if (!premiumActive && !kDebugMode) {
       startScreen = const PremiumScreen(requirePurchase: true);
     } else {
       startScreen = const HomeScreen();

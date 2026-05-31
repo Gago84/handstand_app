@@ -10,12 +10,14 @@ void main() {
       label: '5',
       index: 4,
       items: [
+        'WarmUp',
         'Overhead rod',
         'Bridge',
         'DownDog',
         'Deep squat',
         'Lunge',
         'catcow',
+        'Cooldown',
       ],
       sets: 3,
       rep: '30s',
@@ -35,6 +37,7 @@ void main() {
     final steps = RoutineService().buildSessionSteps(day, availableItems);
 
     expect(steps.map((step) => '${step.title} ${step.setNumber}').toList(), [
+      'Warm Up 1',
       'Overhead rod 1',
       'Bridge 1',
       'DownDog 1',
@@ -53,16 +56,30 @@ void main() {
       'Deep squat 3',
       'Lunge 3',
       'catcow 3',
+      'Cooldown 1',
     ]);
+    expect(steps.first.item.id, 'warmUpCombined');
+    expect(steps.first.durationSeconds, 180);
+    expect(steps.first.isTimed, isTrue);
+    expect(steps.last.item.id, 'cooldownCombined');
+    expect(steps.last.durationSeconds, 180);
+    expect(steps.last.isTimed, isTrue);
   });
 
-  test('buildSessionSteps adds one-set warm ups before Sunday handstand', () {
+  test('buildSessionSteps adds preparation videos around Sunday handstand', () {
     const day = RoutineDay(
       key: 'sunday',
       title: 'Handstand training',
       label: 'Sunday',
       index: 7,
-      items: ['Warm up', 'Back to wall', 'Face to wall', 'Exit', 'Free'],
+      items: [
+        'Warm up',
+        'Back to wall',
+        'Face to wall',
+        'Exit',
+        'Free',
+        'Cooldown',
+      ],
       sets: 3,
       rep: '30s',
       restSeconds: 60,
@@ -80,8 +97,7 @@ void main() {
     final steps = RoutineService().buildSessionSteps(day, availableItems);
 
     expect(steps.map((step) => '${step.title} ${step.setNumber}').toList(), [
-      'Warm up wrist 1',
-      'Warm up shoulder 1',
+      'Warm Up 1',
       'Back to wall 1',
       'Face to wall 1',
       'Exit 1',
@@ -94,17 +110,32 @@ void main() {
       'Face to wall 3',
       'Exit 3',
       'Free 3',
+      'Cooldown 1',
     ]);
-    expect(steps[0].durationSeconds, 60);
+    expect(steps[0].durationSeconds, 180);
     expect(steps[0].totalSets, 1);
     expect(steps[0].restSeconds, 0);
-    expect(steps[0].item.videoUrl, 'assets/video/HS-warmUp-wrist.mp4');
-    expect(steps[1].durationSeconds, 60);
-    expect(steps[1].totalSets, 1);
-    expect(steps[1].restSeconds, 0);
-    expect(steps[1].item.videoUrl, 'assets/video/HS-warmUp-Shoulder.mp4');
-    expect(steps[2].restSeconds, 60);
-    expect(steps[2].item.videoUrl, 'assets/video/HS-BackToWall.mp4');
+    expect(steps[0].isTimed, isTrue);
+    expect(steps[0].item.videoUrl, contains('WarmUp-Combine.mp4'));
+    expect(steps[1].restSeconds, 60);
+    expect(steps[1].item.videoUrl, 'assets/video/HS-BackToWall.mp4');
+    expect(steps.last.item.videoUrl, contains('CoolDown-Combine.mp4'));
+  });
+
+  test('buildSessionSteps skips preparation videos on rest days', () {
+    const day = RoutineDay(
+      key: 'day7',
+      title: 'Rest',
+      label: '7',
+      index: 6,
+      items: [],
+      sets: 1,
+      rep: '',
+      restSeconds: 0,
+      isRestDay: true,
+    );
+
+    expect(RoutineService().buildSessionSteps(day, const []), isEmpty);
   });
 
   test('Sunday routine rest is 60 seconds even if source still says 120', () {

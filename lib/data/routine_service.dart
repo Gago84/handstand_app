@@ -46,73 +46,67 @@ class RoutineService {
     RoutineDay day,
     List<RoutineExerciseItem> availableItems,
   ) {
+    if (day.isRestDay) return const [];
+
     final steps = <RoutineSessionStep>[];
     final categoryItems = _filterItemsForDay(day, availableItems);
     final matchedRoutineItems =
         <({String name, List<RoutineExerciseItem> items})>[];
+    final hasWarmUp = day.items.any(_isWarmUpItem);
+    final hasCooldown = day.items.any(_isCooldownItem);
 
     for (final itemName in day.items) {
-      if (_isHandstandDay(day) && _isWarmUpItem(itemName)) continue;
+      if (_isPreparationItem(itemName)) continue;
 
       final matchedItems = _matchRoutineItem(itemName, categoryItems);
       if (matchedItems.isEmpty) continue;
       matchedRoutineItems.add((name: itemName, items: matchedItems));
     }
 
-    if (_isHandstandDay(day)) {
-      _addHandstandWarmUpSteps(steps);
-    }
+    if (hasWarmUp) _addPreparationStep(steps, _warmUp);
     _addCircuitOrderedSteps(day, matchedRoutineItems, steps);
+    if (hasCooldown) _addPreparationStep(steps, _cooldown);
 
     return steps;
-  }
-
-  bool _isHandstandDay(RoutineDay day) {
-    return day.title.toLowerCase().contains('handstand');
   }
 
   bool _isWarmUpItem(String itemName) {
     return _normalize(itemName).contains('warmup');
   }
 
-  void _addHandstandWarmUpSteps(List<RoutineSessionStep> steps) {
-    const warmUps = [
-      (
-        id: 'warmUpWrist',
-        title: 'Warm up wrist',
-        description: 'Prepare the wrists before handstand training.',
-        videoUrl: 'assets/video/HS-warmUp-wrist.mp4',
-      ),
-      (
-        id: 'warmUpShoulder',
-        title: 'Warm up shoulder',
-        description: 'Prepare the shoulders before handstand training.',
-        videoUrl: 'assets/video/HS-warmUp-Shoulder.mp4',
-      ),
-    ];
+  bool _isCooldownItem(String itemName) {
+    return _normalize(itemName).contains('cooldown');
+  }
 
-    for (final warmUp in warmUps) {
-      steps.add(
-        RoutineSessionStep(
-          item: RoutineExerciseItem(
-            id: warmUp.id,
-            title: warmUp.title,
-            description: warmUp.description,
-            durationSeconds: 60,
-            videoId: '',
-            videoUrl: warmUp.videoUrl,
-            categoryId: 'freeHandstand',
-          ),
-          title: warmUp.title,
-          setNumber: 1,
-          totalSets: 1,
-          durationSeconds: 60,
-          effortLabel: '60s',
-          restSeconds: 0,
-          isTimed: true,
+  bool _isPreparationItem(String itemName) {
+    return _isWarmUpItem(itemName) || _isCooldownItem(itemName);
+  }
+
+  void _addPreparationStep(
+    List<RoutineSessionStep> steps,
+    ({String id, String title, String description, String videoUrl})
+    preparation,
+  ) {
+    steps.add(
+      RoutineSessionStep(
+        item: RoutineExerciseItem(
+          id: preparation.id,
+          title: preparation.title,
+          description: preparation.description,
+          durationSeconds: 180,
+          videoId: '',
+          videoUrl: preparation.videoUrl,
+          categoryId: 'preparation',
         ),
-      );
-    }
+        title: preparation.title,
+        setNumber: 1,
+        totalSets: 1,
+        durationSeconds: 180,
+        effortLabel: '180s',
+        restSeconds: 0,
+        isTimed: true,
+      ),
+    );
   }
 
   void _addCircuitOrderedSteps(
@@ -264,3 +258,19 @@ class RoutineService {
     return value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
   }
 }
+
+const _warmUp = (
+  id: 'warmUpCombined',
+  title: 'Warm Up',
+  description: 'Prepare your body before the training session.',
+  videoUrl:
+      'https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Fpreparation%2FWarmUp-Combine.mp4?alt=media&token=A1186708-E030-4395-AD8F-3C4D7694F2F2',
+);
+
+const _cooldown = (
+  id: 'cooldownCombined',
+  title: 'Cooldown',
+  description: 'Cool down after the training session.',
+  videoUrl:
+      'https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Fpreparation%2FCoolDown-Combine.mp4?alt=media&token=1648EEB6-64D4-4B18-8267-6F7F1D8E4D7B',
+);

@@ -1,68 +1,77 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
 
+  static final Uri _privacyPolicyUri = Uri.parse(
+    'https://banana-57559.web.app/privacy-policy.html',
+  );
+  static final Uri _termsOfUseUri = Uri.parse(
+    'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/',
+  );
+
+  Future<void> _openUrl(Uri uri) async {
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("About"),
-      ),
+      appBar: AppBar(title: const Text("About")),
       body: Padding(
         padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-
-            Text(
+        child: ListView(
+          children: [
+            const Text(
               "Handstand Free",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
 
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
 
-            Text("Version 1.0"),
+            const Text("Version 1.0.9"),
 
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-            Text(
+            const Text(
               "Handstand Free helps beginners learn handstand step by step with simple exercises.",
               style: TextStyle(fontSize: 16),
             ),
 
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
 
-            Text(
+            const Text(
               "Contact",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
 
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
 
-            Text("Email: giang131084@gmail.com"),
+            const Text("Email: giang131084@gmail.com"),
 
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
 
-            Text(
+            const Text(
               "Privacy",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
 
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
 
-            Text(
-              "This app does not collect personal data. Videos are loaded from YouTube.",
+            const Text(
+              "Training plans and instructional videos are loaded from Firebase. "
+              "Subscription purchases are processed by your app store account.",
               style: TextStyle(fontSize: 14),
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: () => _openUrl(_privacyPolicyUri),
+              child: const Text("Privacy Policy"),
+            ),
+            TextButton(
+              onPressed: () => _openUrl(_termsOfUseUri),
+              child: const Text("Terms of Use (EULA)"),
             ),
           ],
         ),

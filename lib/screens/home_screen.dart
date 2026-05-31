@@ -15,11 +15,45 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final RoutineService _routineService = RoutineService();
   late Future<RoutinePlan> _planFuture;
+  int? _selectedDayIndex;
 
   @override
   void initState() {
     super.initState();
     _planFuture = _routineService.loadPlan();
+  }
+
+  Future<void> _openPremium() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const PremiumScreen()),
+    );
+    _resetSelectedDay();
+  }
+
+  Future<void> _openSession(
+    RoutineDay day,
+    List<RoutineSessionStep> steps, {
+    int initialStepIndex = 0,
+  }) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => RoutineSessionScreen(
+          day: day,
+          steps: steps,
+          initialStepIndex: initialStepIndex,
+        ),
+      ),
+    );
+    _resetSelectedDay();
+  }
+
+  void _resetSelectedDay() {
+    if (!mounted || _selectedDayIndex == null) return;
+    setState(() {
+      _selectedDayIndex = null;
+    });
   }
 
   @override
@@ -39,12 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
             tooltip: 'Premium',
             color: Colors.orange,
             icon: const Icon(Icons.workspace_premium),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const PremiumScreen()),
-              );
-            },
+            onPressed: _openPremium,
           ),
         ],
       ),
@@ -79,32 +108,42 @@ class _HomeScreenState extends State<HomeScreen> {
           }
 
           final today = plan.today;
+          final selectedDay = plan.days.firstWhere(
+            (day) => day.index == _selectedDayIndex,
+            orElse: () => today,
+          );
           final steps = _routineService.buildSessionSteps(
-            today,
+            selectedDay,
             plan.exerciseItems,
           );
 
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             children: [
-              _TodayHeader(day: today),
+              _SelectedDayHeader(
+                day: selectedDay,
+                isToday: selectedDay.index == today.index,
+              ),
               const SizedBox(height: 16),
-              _WeekTable(days: plan.days, today: today),
+              _WeekTable(
+                days: plan.days,
+                selectedDay: selectedDay,
+                onSelected: (day) {
+                  setState(() {
+                    _selectedDayIndex = day.index;
+                  });
+                },
+              ),
               const SizedBox(height: 18),
-              _TodayWorkoutCard(
-                day: today,
+              _SelectedWorkoutCard(
+                day: selectedDay,
                 steps: steps,
-                onStart: today.isRestDay || steps.isEmpty
+                isToday: selectedDay.index == today.index,
+                onStart: selectedDay.isRestDay || steps.isEmpty
                     ? null
-                    : () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                RoutineSessionScreen(day: today, steps: steps),
-                          ),
-                        );
-                      },
+                    : () => _openSession(selectedDay, steps),
+                onStepSelected: (index) =>
+                    _openSession(selectedDay, steps, initialStepIndex: index),
               ),
             ],
           );
@@ -114,10 +153,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _TodayHeader extends StatelessWidget {
-  const _TodayHeader({required this.day});
+class _SelectedDayHeader extends StatelessWidget {
+  const _SelectedDayHeader({required this.day, required this.isToday});
 
   final RoutineDay day;
+  final bool isToday;
 
   @override
   Widget build(BuildContext context) {
@@ -131,9 +171,9 @@ class _TodayHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Today',
-            style: TextStyle(color: Colors.white54, fontSize: 13),
+          Text(
+            isToday ? 'Today' : 'Selected Day',
+            style: const TextStyle(color: Colors.white54, fontSize: 13),
           ),
           const SizedBox(height: 8),
           Text(
@@ -158,10 +198,15 @@ class _TodayHeader extends StatelessWidget {
 }
 
 class _WeekTable extends StatelessWidget {
-  const _WeekTable({required this.days, required this.today});
+  const _WeekTable({
+    required this.days,
+    required this.selectedDay,
+    required this.onSelected,
+  });
 
   final List<RoutineDay> days;
-  final RoutineDay today;
+  final RoutineDay selectedDay;
+  final ValueChanged<RoutineDay> onSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -193,11 +238,18 @@ class _WeekTable extends StatelessWidget {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(12, 6, 12, 14),
-            child: Row(
-              children: [
-                for (final day in days)
-                  _DayColumn(day: day, selected: day.index == today.index),
-              ],
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (final day in days)
+                    _DayColumn(
+                      day: day,
+                      selected: day.index == selectedDay.index,
+                      onTap: () => onSelected(day),
+                    ),
+                ],
+              ),
             ),
           ),
         ],
@@ -207,59 +259,71 @@ class _WeekTable extends StatelessWidget {
 }
 
 class _DayColumn extends StatelessWidget {
-  const _DayColumn({required this.day, required this.selected});
+  const _DayColumn({
+    required this.day,
+    required this.selected,
+    required this.onTap,
+  });
 
   final RoutineDay day;
   final bool selected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 132,
-      margin: const EdgeInsets.only(right: 10),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
+    return Padding(
+      padding: const EdgeInsets.only(right: 10),
+      child: Material(
         color: selected ? Colors.orange : const Color(0xFF22262A),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: selected ? Colors.orangeAccent : Colors.white10,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            width: 132,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: selected ? Colors.orangeAccent : Colors.white10,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _weekdayLabel(day.index),
+                  style: TextStyle(
+                    color: selected ? Colors.black : Colors.white54,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  day.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: selected ? Colors.black : Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    height: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  day.isRestDay ? 'Rest' : day.items.join('\n'),
+                  style: TextStyle(
+                    color: selected ? Colors.black87 : Colors.white60,
+                    fontSize: 12,
+                    height: 1.25,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            _weekdayLabel(day.index),
-            style: TextStyle(
-              color: selected ? Colors.black : Colors.white54,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            day.title,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: selected ? Colors.black : Colors.white,
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-              height: 1.2,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            day.isRestDay ? 'Rest' : day.items.join('\n'),
-            maxLines: 5,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: selected ? Colors.black87 : Colors.white60,
-              fontSize: 12,
-              height: 1.25,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -278,16 +342,20 @@ class _DayColumn extends StatelessWidget {
   }
 }
 
-class _TodayWorkoutCard extends StatelessWidget {
-  const _TodayWorkoutCard({
+class _SelectedWorkoutCard extends StatelessWidget {
+  const _SelectedWorkoutCard({
     required this.day,
     required this.steps,
+    required this.isToday,
     required this.onStart,
+    required this.onStepSelected,
   });
 
   final RoutineDay day;
   final List<RoutineSessionStep> steps;
+  final bool isToday;
   final VoidCallback? onStart;
+  final ValueChanged<int> onStepSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -301,9 +369,9 @@ class _TodayWorkoutCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "Today's Exercises",
-            style: TextStyle(
+          Text(
+            isToday ? "Today's Exercises" : '${day.title} Exercises',
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 20,
               fontWeight: FontWeight.w800,
@@ -322,7 +390,11 @@ class _TodayWorkoutCard extends StatelessWidget {
             )
           else
             for (var i = 0; i < steps.length; i++)
-              _WorkoutStepRow(index: i + 1, step: steps[i]),
+              _WorkoutStepRow(
+                index: i + 1,
+                step: steps[i],
+                onTap: () => onStepSelected(i),
+              ),
           const SizedBox(height: 18),
           SizedBox(
             width: double.infinity,
@@ -337,9 +409,12 @@ class _TodayWorkoutCard extends StatelessWidget {
               ),
               onPressed: onStart,
               icon: const Icon(Icons.play_arrow),
-              label: const Text(
-                'Start Today Session',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+              label: Text(
+                isToday ? 'Start Today Session' : 'Start Selected Session',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
           ),
@@ -350,56 +425,65 @@ class _TodayWorkoutCard extends StatelessWidget {
 }
 
 class _WorkoutStepRow extends StatelessWidget {
-  const _WorkoutStepRow({required this.index, required this.step});
+  const _WorkoutStepRow({
+    required this.index,
+    required this.step,
+    required this.onTap,
+  });
 
   final int index;
   final RoutineSessionStep step;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 28,
-            height: 28,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              color: Colors.orange,
-              shape: BoxShape.circle,
-            ),
-            child: Text(
-              '$index',
-              style: const TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 28,
+              height: 28,
+              alignment: Alignment.center,
+              decoration: const BoxDecoration(
+                color: Colors.orange,
+                shape: BoxShape.circle,
+              ),
+              child: Text(
+                '$index',
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  step.title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    step.title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  'Set ${step.setNumber}/${step.totalSets} • ${step.effortLabel}',
-                  style: const TextStyle(color: Colors.white54, fontSize: 12),
-                ),
-              ],
+                  const SizedBox(height: 3),
+                  Text(
+                    'Set ${step.setNumber}/${step.totalSets} • ${step.effortLabel}',
+                    style: const TextStyle(color: Colors.white54, fontSize: 12),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

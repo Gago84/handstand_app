@@ -15,10 +15,12 @@ class RoutineSessionScreen extends StatefulWidget {
     super.key,
     required this.day,
     required this.steps,
+    this.initialStepIndex = 0,
   });
 
   final RoutineDay day;
   final List<RoutineSessionStep> steps;
+  final int initialStepIndex;
 
   @override
   State<RoutineSessionScreen> createState() => _RoutineSessionScreenState();
@@ -37,7 +39,10 @@ class _RoutineSessionScreenState extends State<RoutineSessionScreen> {
   @override
   void initState() {
     super.initState();
-    _prepareVideo();
+    if (widget.steps.isNotEmpty) {
+      _stepIndex = widget.initialStepIndex.clamp(0, widget.steps.length - 1);
+      _prepareVideo();
+    }
   }
 
   @override
