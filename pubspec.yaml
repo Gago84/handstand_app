@@ -2,7 +2,7 @@ name: handstand_app
 description: "A new Flutter project."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.9+20 # App Store Connect resubmission 31 5 2026
+version: 1.0.10+24 # Add new-version update prompt 1 6 2026
 
 environment:
   sdk: ^3.11.0
@@ -23,6 +23,7 @@ dependencies:
   in_app_purchase: ^3.2.3
   in_app_purchase_android: ^0.4.0+11
   url_launcher: ^6.3.2
+  upgrader: ^13.5.0
 
 dev_dependencies:
   flutter_test:
@@ -38,10 +39,9 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/
-    - assets/video/HS-BackToWall.mp4
-    - assets/video/HS-Exit.mp4
-    - assets/video/HS-FaceToWall.mp4
-    - assets/video/HS-Free.mp4
-    - assets/video/HS-warmUp-Shoulder.mp4
-    - assets/video/HS-warmUp-wrist.mp4
+    - assets/front-por.jpg
+    - assets/icon-android banner.png
+    - assets/icon-android.png
+    - assets/icon.png
+    - assets/side-land.jpg
+    - assets/side-por.jpg

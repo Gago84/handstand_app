@@ -242,7 +242,7 @@ Widget _segment(String text, bool isGood) {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha: 0.2),
                     blurRadius: 8,
                   )
                 ]
@@ -335,7 +335,7 @@ alignment: const Alignment(0, -0.5),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 14),
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -417,6 +417,9 @@ if (!isDone) {
   await ProgressService.markDone("step_${widget.index}");
 }
 
+  if (!context.mounted) {
+    return;
+  }
   Navigator.pop(context);
 },
                           child: Container(

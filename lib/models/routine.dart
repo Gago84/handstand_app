@@ -73,7 +73,11 @@ class RoutineExerciseItem {
     required String categoryId,
     required Map<String, dynamic> data,
   }) {
-    final appVideoUrl = _appVideoUrl(categoryId: categoryId, id: id);
+    final hostedVideoUrl =
+        data['videoShortUrl']?.toString() ??
+        data['videoUrl']?.toString() ??
+        data['video_url']?.toString() ??
+        '';
 
     return RoutineExerciseItem(
       id: id,
@@ -81,19 +85,14 @@ class RoutineExerciseItem {
       title: data['title_en']?.toString() ?? data['title']?.toString() ?? id,
       description: data['description_en']?.toString() ?? '',
       durationSeconds: _readInt(data['durationSeconds']),
-      videoId: appVideoUrl == null
+      videoId: hostedVideoUrl.isEmpty
           ? data['youtubeId']?.toString() ??
                 data['videoId']?.toString() ??
                 data['VideoPortraitScreen']?.toString() ??
                 data['VideoLandScreen']?.toString() ??
                 ''
           : '',
-      videoUrl:
-          appVideoUrl ??
-          data['videoShortUrl']?.toString() ??
-          data['videoUrl']?.toString() ??
-          data['video_url']?.toString() ??
-          '',
+      videoUrl: hostedVideoUrl,
     );
   }
 }
@@ -177,18 +176,4 @@ int _restSecondsForDay({
   }
 
   return _parseSeconds(value);
-}
-
-String? _appVideoUrl({required String categoryId, required String id}) {
-  if (categoryId != 'freeHandstand') return null;
-
-  return switch (id) {
-    'backToWall' => 'assets/video/HS-BackToWall.mp4',
-    'faceToWall' => 'assets/video/HS-FaceToWall.mp4',
-    'exitHandstand' => 'assets/video/HS-Exit.mp4',
-    'freeHandstand' => 'assets/video/HS-Free.mp4',
-    'warmUpWrist' => 'assets/video/HS-warmUp-wrist.mp4',
-    'warmUpShoulder' => 'assets/video/HS-warmUp-Shoulder.mp4',
-    _ => null,
-  };
 }

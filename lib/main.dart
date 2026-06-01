@@ -3,8 +3,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:upgrader/upgrader.dart';
 
 import 'firebase_options.dart'; // 👈 QUAN TRỌNG
+import 'Services/premium_access_service.dart';
 import 'screens/home_screen.dart';
 import 'screens/premium_screen.dart';
 import 'screens/prerequisite_screen.dart';
@@ -23,7 +25,7 @@ void main() async {
   final skipWelcome = prefs.getBool('skip_welcome_screen') ?? false;
   final passedRequirements =
       prefs.getBool('initial_requirements_passed') ?? false;
-  final premiumActive = prefs.getBool('premium_active') ?? false;
+  final premiumActive = await PremiumAccessService.hasActiveCachedPremium();
 
   runApp(
     HandstandApp(
@@ -40,11 +42,13 @@ class HandstandApp extends StatelessWidget {
     this.skipWelcome = false,
     this.passedRequirements = false,
     this.premiumActive = false,
+    this.enableUpgradeCheck = true,
   });
 
   final bool skipWelcome;
   final bool passedRequirements;
   final bool premiumActive;
+  final bool enableUpgradeCheck;
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +67,9 @@ class HandstandApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Handstand Free',
       theme: ThemeData(primarySwatch: Colors.orange),
-      home: startScreen,
+      home: enableUpgradeCheck
+          ? UpgradeAlert(showIgnore: false, showLater: true, child: startScreen)
+          : startScreen,
     );
   }
 }

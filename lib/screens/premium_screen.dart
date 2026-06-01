@@ -4,9 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../Services/premium_access_service.dart';
 import 'home_screen.dart';
 
 class PremiumScreen extends StatefulWidget {
@@ -39,6 +39,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
   List<ProductDetails> _products = [];
   bool _isAvailable = false;
   bool _isLoading = true;
+  bool _isRestoring = false;
   bool _isPremium = false;
   String? _message;
 
@@ -70,10 +71,10 @@ class _PremiumScreenState extends State<PremiumScreen> {
   }
 
   Future<void> _loadPremiumState() async {
-    final prefs = await SharedPreferences.getInstance();
+    final isPremium = await PremiumAccessService.hasActiveCachedPremium();
     if (!mounted) return;
     setState(() {
-      _isPremium = prefs.getBool('premium_active') ?? false;
+      _isPremium = isPremium;
     });
   }
 
@@ -165,6 +166,9 @@ class _PremiumScreenState extends State<PremiumScreen> {
     final PurchaseParam purchaseParam;
     if (defaultTargetPlatform == TargetPlatform.android &&
         product is GooglePlayProductDetails) {
+      await PremiumAccessService.rememberPendingAndroidBasePlan(
+        _basePlanId(product),
+      );
       purchaseParam = GooglePlayPurchaseParam(
         productDetails: product,
         offerToken: product.offerToken,
@@ -177,10 +181,27 @@ class _PremiumScreenState extends State<PremiumScreen> {
   }
 
   Future<void> _restorePurchases() async {
+    if (_isRestoring) return;
     setState(() {
+      _isRestoring = true;
       _message = null;
     });
-    await _inAppPurchase.restorePurchases();
+    try {
+      await _inAppPurchase.restorePurchases();
+      if (mounted) {
+        setState(() {
+          _message ??= 'Restore request completed.';
+        });
+      }
+    } catch (error) {
+      _setMessage('Could not restore purchases: $error');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isRestoring = false;
+        });
+      }
+    }
   }
 
   Future<void> _openUrl(Uri uri) async {
@@ -192,34 +213,34 @@ class _PremiumScreenState extends State<PremiumScreen> {
 
   Future<void> _handlePurchaseUpdates(List<PurchaseDetails> purchases) async {
     for (final purchase in purchases) {
+      var shouldCompletePurchase = false;
       if (purchase.status == PurchaseStatus.pending) {
         _setMessage('Purchase is pending.');
       } else if (purchase.status == PurchaseStatus.error) {
         _setMessage(purchase.error?.message ?? 'Purchase failed.');
       } else if (purchase.status == PurchaseStatus.purchased ||
           purchase.status == PurchaseStatus.restored) {
-        await _unlockPremium();
-        _setMessage('Premium is active.');
-        if (widget.requirePurchase) {
-          _goToHome();
+        shouldCompletePurchase = true;
+        final accepted = await PremiumAccessService.recordStorePurchase(
+          purchase,
+        );
+        if (accepted) {
+          await _loadPremiumState();
+          _setMessage('Premium is active.');
+          if (widget.requirePurchase) {
+            _goToHome();
+          }
+        } else {
+          _setMessage('The store purchase could not be verified.');
         }
       } else if (purchase.status == PurchaseStatus.canceled) {
         _setMessage('Purchase canceled.');
       }
 
-      if (purchase.pendingCompletePurchase) {
+      if (purchase.pendingCompletePurchase && shouldCompletePurchase) {
         await _inAppPurchase.completePurchase(purchase);
       }
     }
-  }
-
-  Future<void> _unlockPremium() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('premium_active', true);
-    if (!mounted) return;
-    setState(() {
-      _isPremium = true;
-    });
   }
 
   void _setMessage(String message) {
@@ -249,8 +270,13 @@ class _PremiumScreenState extends State<PremiumScreen> {
         actions: [
           IconButton(
             tooltip: 'Restore purchases',
-            onPressed: _isAvailable ? _restorePurchases : null,
-            icon: const Icon(Icons.restore),
+            onPressed: _isAvailable && !_isRestoring ? _restorePurchases : null,
+            icon: _isRestoring
+                ? const SizedBox.square(
+                    dimension: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.restore),
           ),
         ],
       ),

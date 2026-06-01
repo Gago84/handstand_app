@@ -12,14 +12,10 @@ class ProgressService {
     final prefs = await SharedPreferences.getInstance();
     final list = prefs.getStringList(key) ?? [];
 
-    print("🔥 BEFORE SAVE: $list");
-
     if (!list.contains(id)) {
       list.add(id);
       await prefs.setStringList(key, list);
     }
-
-    print("🔥 AFTER SAVE: $list");
   }
 
   static Future<bool> isDone(String id) async {
@@ -44,7 +40,7 @@ class ProgressService {
 
     final diff = now.difference(savedTime);
 
-    return diff.inSeconds < 10; // 🔥 10 second in test, 3h in production
+    return diff < const Duration(hours: 3);
   }
   
   // 🔥 SAVE FEEDBACK COUNT

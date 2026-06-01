@@ -393,10 +393,11 @@ class _VideoPanelState extends State<_VideoPanel> {
     try {
       await DefaultCacheManager().downloadFile(videoUrl);
     } finally {
-      if (!mounted || widget.videoUrl != videoUrl) return;
-      setState(() {
-        _isCaching = false;
-      });
+      if (mounted && widget.videoUrl == videoUrl) {
+        setState(() {
+          _isCaching = false;
+        });
+      }
     }
   }
 

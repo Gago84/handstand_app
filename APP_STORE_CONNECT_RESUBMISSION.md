@@ -2,7 +2,7 @@
 
 Apple rejected version 1.0.8 on May 29, 2026 for Guideline 3.1.2 because the App Store metadata did not include a functional Terms of Use (EULA) link for auto-renewable subscriptions.
 
-The updated binary is version 1.0.9 build 20. Its Premium screen includes
+The updated binary is version 1.0.9 build 23. Its Premium screen includes
 functional Privacy Policy and Terms of Use links.
 
 Before resubmitting:

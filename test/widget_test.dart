@@ -6,7 +6,7 @@ void main() {
   testWidgets('new users start on the welcome screen', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const HandstandApp());
+    await tester.pumpWidget(const HandstandApp(enableUpgradeCheck: false));
 
     expect(find.text('Handstand Journey'), findsOneWidget);
     expect(find.text('Get Started'), findsOneWidget);

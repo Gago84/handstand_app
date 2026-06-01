@@ -90,7 +90,7 @@ void loadData() async {
                     filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                     child: Container(
                       padding: const EdgeInsets.all(20),
-                      color: Colors.grey.withOpacity(0.1),
+                      color: Colors.grey.withValues(alpha: 0.1),
                       child: Column(
                         children: [
                           _stat("Total sessions", total),

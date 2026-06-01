@@ -118,7 +118,7 @@ void main() {
     expect(steps[0].isTimed, isTrue);
     expect(steps[0].item.videoUrl, contains('WarmUp-Combine.mp4'));
     expect(steps[1].restSeconds, 60);
-    expect(steps[1].item.videoUrl, 'assets/video/HS-BackToWall.mp4');
+    expect(steps[1].item.videoUrl, 'https://example.com/old-web-video.mp4');
     expect(steps.last.item.videoUrl, contains('CoolDown-Combine.mp4'));
   });
 
@@ -150,7 +150,7 @@ void main() {
     expect(day.restSeconds, 60);
   });
 
-  test('free handstand items prefer bundled app videos over old links', () {
+  test('hosted videos are streamed and cached instead of bundled', () {
     final item = RoutineExerciseItem.fromMap(
       id: 'faceToWall',
       categoryId: 'freeHandstand',
@@ -163,7 +163,7 @@ void main() {
     );
 
     expect(item.videoId, '');
-    expect(item.videoUrl, 'assets/video/HS-FaceToWall.mp4');
+    expect(item.videoUrl, 'https://example.com/old-web-video.mp4');
   });
 }
 

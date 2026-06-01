@@ -38,6 +38,12 @@
       }
     }
   },
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
   "hosting": {
     "public": "hosting",
     "ignore": [

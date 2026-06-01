@@ -1,0 +1,22 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Public read-only training catalog used by the released mobile apps.
+    match /exercises/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Legacy exercise catalog still used by the existing detail screen.
+    match /HandStand/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Deny access to any collection added in the future until it is reviewed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
