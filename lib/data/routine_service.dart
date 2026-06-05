@@ -118,6 +118,7 @@ class RoutineService {
       for (final matched in matchedRoutineItems) {
         final item = matched.items[(set - 1) % matched.items.length];
         final isTimed = _isTimedPrescription(day.rep);
+        final shouldUseDayDuration = _isTuesdayDay(day);
         steps.add(
           RoutineSessionStep(
             item: item,
@@ -125,7 +126,9 @@ class RoutineService {
             setNumber: set,
             totalSets: day.sets,
             durationSeconds: isTimed
-                ? (item.durationSeconds > 0
+                ? (shouldUseDayDuration
+                      ? _durationFromRep(day.rep)
+                      : item.durationSeconds > 0
                       ? item.durationSeconds
                       : _durationFromRep(day.rep))
                 : 0,
@@ -205,6 +208,8 @@ class RoutineService {
         'gluteBridge',
       final value when value.contains('single') && value.contains('calf') =>
         'singleCalfRaise',
+      final value when value.contains('side') && value.contains('plank') =>
+        'plank',
       _ => null,
     };
 
@@ -252,6 +257,11 @@ class RoutineService {
 
   String _displayTitle(String routineName) {
     return routineName.replaceAll('Bungarian', 'Bulgarian');
+  }
+
+  bool _isTuesdayDay(RoutineDay day) {
+    final normalizedKey = _normalize(day.key);
+    return day.index == DateTime.tuesday || normalizedKey.contains('tuesday');
   }
 
   String _normalize(String value) {

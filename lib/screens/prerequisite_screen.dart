@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../config/premium_gate.dart';
+import 'home_screen.dart';
 import 'premium_screen.dart';
 
 class PrerequisiteScreen extends StatefulWidget {
@@ -13,10 +15,13 @@ class PrerequisiteScreen extends StatefulWidget {
 }
 
 class _PrerequisiteScreenState extends State<PrerequisiteScreen> {
+  _Gender? _gender;
   bool? _canPullUp;
   bool? _canPushUp;
   bool _showRequirements = false;
 
+  int get _requiredReps => _gender == _Gender.female ? 1 : 3;
+  String get _repLabel => _requiredReps == 1 ? 'rep' : 'reps';
   bool get _answered => _canPullUp != null && _canPushUp != null;
   bool get _canAccessProgram => _canPullUp == true && _canPushUp == true;
 
@@ -42,7 +47,9 @@ class _PrerequisiteScreenState extends State<PrerequisiteScreen> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (_) => const PremiumScreen(requirePurchase: true),
+        builder: (_) => PremiumGate.bypassForLocalTesting
+            ? const HomeScreen()
+            : const PremiumScreen(requirePurchase: true),
       ),
     );
   }
@@ -50,6 +57,22 @@ class _PrerequisiteScreenState extends State<PrerequisiteScreen> {
   void _resetAnswers() {
     setState(() {
       _showRequirements = false;
+    });
+  }
+
+  void _selectGender(_Gender gender) {
+    setState(() {
+      _gender = gender;
+      _canPullUp = null;
+      _canPushUp = null;
+    });
+  }
+
+  void _changeGender() {
+    setState(() {
+      _gender = null;
+      _canPullUp = null;
+      _canPushUp = null;
     });
   }
 
@@ -70,11 +93,83 @@ class _PrerequisiteScreenState extends State<PrerequisiteScreen> {
               padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
               child: _showRequirements
                   ? _buildRequirements(context)
+                  : _gender == null
+                  ? _buildGenderQuestion(context)
                   : _buildQuestions(context),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildGenderQuestion(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact = constraints.maxHeight < 760;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(height: isCompact ? 8 : 24),
+                    Icon(
+                      Icons.person_outline,
+                      size: isCompact ? 54 : 64,
+                      color: Colors.white,
+                    ),
+                    SizedBox(height: isCompact ? 18 : 24),
+                    const Text(
+                      'Tell Us About Yourself',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'What is your gender?',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 16,
+                        height: 1.5,
+                      ),
+                    ),
+                    SizedBox(height: isCompact ? 24 : 36),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _AnswerButton(
+                            label: 'Female',
+                            selected: false,
+                            onPressed: () => _selectGender(_Gender.female),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _AnswerButton(
+                            label: 'Male',
+                            selected: false,
+                            onPressed: () => _selectGender(_Gender.male),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -120,7 +215,8 @@ class _PrerequisiteScreenState extends State<PrerequisiteScreen> {
                     ),
                     SizedBox(height: isCompact ? 24 : 36),
                     _QuestionBlock(
-                      question: 'Can you do 3 reps of regular pull up?',
+                      question:
+                          'Can you do $_requiredReps $_repLabel of regular pull up?',
                       compact: isCompact,
                       value: _canPullUp,
                       onChanged: (value) {
@@ -131,7 +227,8 @@ class _PrerequisiteScreenState extends State<PrerequisiteScreen> {
                     ),
                     SizedBox(height: isCompact ? 16 : 20),
                     _QuestionBlock(
-                      question: 'Can you do 3 reps of regular push up?',
+                      question:
+                          'Can you do $_requiredReps $_repLabel of regular push up?',
                       compact: isCompact,
                       value: _canPushUp,
                       onChanged: (value) {
@@ -161,6 +258,13 @@ class _PrerequisiteScreenState extends State<PrerequisiteScreen> {
                   'Continue',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
+              ),
+            ),
+            TextButton(
+              onPressed: _changeGender,
+              child: const Text(
+                'Change gender',
+                style: TextStyle(color: Colors.white70),
               ),
             ),
           ],
@@ -292,6 +396,8 @@ class _PrerequisiteScreenState extends State<PrerequisiteScreen> {
     );
   }
 }
+
+enum _Gender { female, male }
 
 class _QuestionBlock extends StatelessWidget {
   const _QuestionBlock({

@@ -34,6 +34,9 @@ class _RoutineSessionScreenState extends State<RoutineSessionScreen> {
   YoutubePlayerController? _youtubeController;
 
   RoutineSessionStep get _currentStep => widget.steps[_stepIndex];
+  RoutineSessionStep? get _nextStep => _stepIndex < widget.steps.length - 1
+      ? widget.steps[_stepIndex + 1]
+      : null;
   bool get _hasYoutubeVideo => _currentStep.item.videoId.isNotEmpty;
 
   @override
@@ -214,6 +217,7 @@ class _RoutineSessionScreenState extends State<RoutineSessionScreen> {
                         effortLabel: _currentStep.effortLabel,
                         isTimed: _currentStep.isTimed,
                         restSeconds: _currentStep.restSeconds,
+                        nextTitle: _nextStep?.title,
                       ),
                       const SizedBox(height: 18),
                       _ActionButton(
@@ -604,6 +608,7 @@ class _TimerPanel extends StatelessWidget {
     required this.effortLabel,
     required this.isTimed,
     required this.restSeconds,
+    this.nextTitle,
   });
 
   final _SessionPhase phase;
@@ -612,6 +617,7 @@ class _TimerPanel extends StatelessWidget {
   final String effortLabel;
   final bool isTimed;
   final int restSeconds;
+  final String? nextTitle;
 
   @override
   Widget build(BuildContext context) {
@@ -649,7 +655,10 @@ class _TimerPanel extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Rest after done: ${restSeconds}s',
+            phase == _SessionPhase.rest && nextTitle != null
+                ? 'Next: $nextTitle'
+                : 'Rest after done: ${restSeconds}s',
+            textAlign: TextAlign.center,
             style: const TextStyle(color: Colors.white54),
           ),
         ],

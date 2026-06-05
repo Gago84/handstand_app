@@ -34,14 +34,18 @@ class RoutineDay {
       title: title,
       label: data['label_en']?.toString() ?? '',
       index: _readInt(data['index']),
-      items: (data['items'] as List? ?? const [])
-          .map((item) => item.toString())
-          .toList(),
+      items: _normalizeRoutineItems(data['items'] as List? ?? const []),
       sets: _readInt(prescription['set'], fallback: 1),
-      rep: prescription['rep']?.toString() ?? '',
+      rep: _repForDay(
+        key: key,
+        title: title,
+        index: _readInt(data['index']),
+        value: prescription['rep']?.toString() ?? '',
+      ),
       restSeconds: _restSecondsForDay(
         key: key,
         title: title,
+        index: _readInt(data['index']),
         value: prescription['rest']?.toString() ?? '',
       ),
       isRestDay: data['rest'] == true,
@@ -165,15 +169,51 @@ int _parseSeconds(String value) {
   return int.tryParse(match?.group(1) ?? '') ?? 0;
 }
 
+List<String> _normalizeRoutineItems(List items) {
+  final normalizedItems = <String>[];
+  for (final item in items) {
+    final name = item.toString();
+    if (_normalizeText(name).contains('eachsideplank')) {
+      normalizedItems.addAll(const ['Right side plank', 'Left side plank']);
+    } else {
+      normalizedItems.add(name);
+    }
+  }
+  return normalizedItems;
+}
+
+String _repForDay({
+  required String key,
+  required String title,
+  required int index,
+  required String value,
+}) {
+  if (_isTuesday(key: key, index: index) &&
+      RegExp(r'\d+\s*s(ec(ond)?s?)?\b', caseSensitive: false).hasMatch(value)) {
+    return '60s';
+  }
+  return value;
+}
+
 int _restSecondsForDay({
   required String key,
   required String title,
+  required int index,
   required String value,
 }) {
-  final normalizedTitle = title.toLowerCase();
-  if (key == 'sunday' || normalizedTitle.contains('handstand')) {
-    return 60;
+  if (_isTuesday(key: key, index: index)) {
+    final sourceSeconds = _parseSeconds(value);
+    return sourceSeconds > 0 ? 30 : 0;
   }
 
   return _parseSeconds(value);
+}
+
+bool _isTuesday({required String key, required int index}) {
+  final normalizedKey = _normalizeText(key);
+  return index == DateTime.tuesday || normalizedKey.contains('tuesday');
+}
+
+String _normalizeText(String value) {
+  return value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
 }

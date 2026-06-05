@@ -41,6 +41,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
   bool _isLoading = true;
   bool _isRestoring = false;
   bool _isPremium = false;
+  bool _autoRestoreAttempted = false;
   String? _message;
 
   Set<String> get _productIds {
@@ -76,6 +77,9 @@ class _PremiumScreenState extends State<PremiumScreen> {
     setState(() {
       _isPremium = isPremium;
     });
+    if (isPremium && widget.requirePurchase) {
+      _goToHome();
+    }
   }
 
   Future<void> _loadProducts() async {
@@ -109,6 +113,11 @@ class _PremiumScreenState extends State<PremiumScreen> {
               ? 'No subscription plans found. Install the app from the store test track and use a sandbox or tester account.'
               : null);
     });
+
+    if (widget.requirePurchase && !_isPremium && !_autoRestoreAttempted) {
+      _autoRestoreAttempted = true;
+      await _restorePurchases(silent: true);
+    }
   }
 
   int _sortProducts(ProductDetails a, ProductDetails b) {
@@ -180,17 +189,19 @@ class _PremiumScreenState extends State<PremiumScreen> {
     await _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
   }
 
-  Future<void> _restorePurchases() async {
+  Future<void> _restorePurchases({bool silent = false}) async {
     if (_isRestoring) return;
     setState(() {
       _isRestoring = true;
-      _message = null;
+      _message = silent ? 'Checking active subscription...' : null;
     });
     try {
       await _inAppPurchase.restorePurchases();
       if (mounted) {
         setState(() {
-          _message ??= 'Restore request completed.';
+          _message ??= silent
+              ? 'No active subscription was restored.'
+              : 'Restore request completed.';
         });
       }
     } catch (error) {
@@ -270,7 +281,9 @@ class _PremiumScreenState extends State<PremiumScreen> {
         actions: [
           IconButton(
             tooltip: 'Restore purchases',
-            onPressed: _isAvailable && !_isRestoring ? _restorePurchases : null,
+            onPressed: _isAvailable && !_isRestoring
+                ? () => _restorePurchases()
+                : null,
             icon: _isRestoring
                 ? const SizedBox.square(
                     dimension: 20,

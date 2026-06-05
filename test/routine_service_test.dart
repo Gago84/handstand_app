@@ -138,7 +138,27 @@ void main() {
     expect(RoutineService().buildSessionSteps(day, const []), isEmpty);
   });
 
-  test('Sunday routine rest is 60 seconds even if source still says 120', () {
+  test('Tuesday timed duration and rest are normalized', () {
+    final day = RoutineDay.fromMap({
+      'key': 'tuesday',
+      'title_en': 'Core',
+      'index': 2,
+      'items': ['WarmUp', 'Plank', 'Cooldown'],
+      'prescription': {'set': 1, 'rep': '30s', 'rest': '60s'},
+    });
+
+    final steps = RoutineService().buildSessionSteps(day, [
+      _item(id: 'plank', title: 'Plank', categoryId: 'core'),
+    ]);
+
+    expect(day.rep, '60s');
+    expect(day.restSeconds, 30);
+    expect(steps[1].durationSeconds, 60);
+    expect(steps[1].effortLabel, '60s');
+    expect(steps[1].restSeconds, 30);
+  });
+
+  test('other timed routine days keep their source duration and rest', () {
     final day = RoutineDay.fromMap({
       'key': 'sunday',
       'title_en': 'Handstand training',
@@ -147,7 +167,38 @@ void main() {
       'prescription': {'set': 3, 'rep': '30s', 'rest': '120s'},
     });
 
-    expect(day.restSeconds, 60);
+    expect(day.rep, '30s');
+    expect(day.restSeconds, 120);
+  });
+
+  test('each-side plank is split into right and left plank steps', () {
+    final day = RoutineDay.fromMap({
+      'key': 'tuesday',
+      'title_en': 'Core',
+      'index': 2,
+      'items': ['WarmUp', 'Each Side plank', 'Cooldown'],
+      'prescription': {'set': 1, 'rep': '30s', 'rest': '60s'},
+    });
+
+    final steps = RoutineService().buildSessionSteps(day, [
+      _item(id: 'plank', title: 'Plank', categoryId: 'core'),
+    ]);
+
+    expect(day.items, [
+      'WarmUp',
+      'Right side plank',
+      'Left side plank',
+      'Cooldown',
+    ]);
+    expect(steps.map((step) => step.title).toList(), [
+      'Warm Up',
+      'Right side plank',
+      'Left side plank',
+      'Cooldown',
+    ]);
+    expect(steps[1].durationSeconds, 60);
+    expect(steps[1].effortLabel, '60s');
+    expect(steps[1].restSeconds, 30);
   });
 
   test('hosted videos are streamed and cached instead of bundled', () {
@@ -167,7 +218,11 @@ void main() {
   });
 }
 
-RoutineExerciseItem _item({required String id, required String title}) {
+RoutineExerciseItem _item({
+  required String id,
+  required String title,
+  String categoryId = 'coolDown',
+}) {
   return RoutineExerciseItem(
     id: id,
     title: title,
@@ -175,7 +230,7 @@ RoutineExerciseItem _item({required String id, required String title}) {
     durationSeconds: 30,
     videoId: '',
     videoUrl: '',
-    categoryId: 'coolDown',
+    categoryId: categoryId,
   );
 }
 
