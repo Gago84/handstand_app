@@ -2,7 +2,7 @@ name: handstand_app
 description: "A new Flutter project."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.10+24 # Add new-version update prompt 1 6 2026
+version: 1.0.11+25 # Add new-version update prompt 5 6 2026
 
 environment:
   sdk: ^3.11.0

@@ -46,6 +46,26 @@ void main() {
     expect(find.text('Can you do 3 reps of regular push up?'), findsOneWidget);
   });
 
+  testWidgets('failed initial requirements show instruction videos', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: PrerequisiteScreen()));
+
+    await tester.tap(find.text('Female'));
+    await tester.pump();
+    await tester.tap(find.text('No').first);
+    await tester.pump();
+    await tester.tap(find.text('No').last);
+    await tester.pump();
+    await tester.tap(find.text('Continue'));
+    await tester.pump();
+
+    expect(find.text('Resistance band pull up'), findsOneWidget);
+    expect(find.text('Negative pull up'), findsOneWidget);
+    expect(find.text('Incline push up'), findsOneWidget);
+    expect(find.text('Watch instruction video'), findsNWidgets(3));
+  });
+
   testWidgets('debug prerequisite completion bypasses the premium gate', (
     WidgetTester tester,
   ) async {
