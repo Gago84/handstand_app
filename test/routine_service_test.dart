@@ -3,6 +3,53 @@ import 'package:handstand_app/data/routine_service.dart';
 import 'package:handstand_app/models/routine.dart';
 
 void main() {
+  test('local routine videos use Firebase Storage download URLs', () async {
+    final plan = await RoutineService().loadPlan(level: RoutineLevel.beginner);
+    final monday = plan.days.firstWhere((day) => day.index == DateTime.monday);
+    final steps = RoutineService().buildSessionSteps(
+      monday,
+      plan.exerciseItems,
+    );
+
+    expect(
+      steps.first.item.videoUrl,
+      startsWith(
+        'https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/',
+      ),
+    );
+    expect(
+      steps.first.item.videoUrl,
+      contains('exercise%2Fvideo%20version%201.1.0%2FWarmUp.mp4'),
+    );
+    expect(
+      steps[1].item.videoUrl,
+      contains('Beginner%2F2_Mon_Pike%20pushup.mp4'),
+    );
+  });
+
+  test('local routine uses circuit rounds for multi-set exercises', () async {
+    final plan = await RoutineService().loadPlan(level: RoutineLevel.beginner);
+    final monday = plan.days.firstWhere((day) => day.index == DateTime.monday);
+    final steps = RoutineService().buildSessionSteps(
+      monday,
+      plan.exerciseItems,
+    );
+
+    expect(steps.map((step) => '${step.title} ${step.setNumber}').toList(), [
+      'WarmUp 1',
+      'Pike pushup 1',
+      'Regular pushup 1',
+      'Diamond pushup 1',
+      'Pike pushup 2',
+      'Regular pushup 2',
+      'Diamond pushup 2',
+      'Pike pushup 3',
+      'Regular pushup 3',
+      'Diamond pushup 3',
+      'Cooldown 1',
+    ]);
+  });
+
   test('buildSessionSteps completes all exercises in each set first', () {
     const day = RoutineDay(
       key: 'day5',
@@ -201,6 +248,64 @@ void main() {
     expect(steps[1].restSeconds, 30);
   });
 
+  test('side plank steps prefer side plank videos over generic plank', () {
+    final day = RoutineDay.fromMap({
+      'key': 'tuesday',
+      'title_en': 'Core',
+      'index': 2,
+      'items': ['Each Side plank'],
+      'prescription': {'set': 1, 'rep': '30s', 'rest': '60s'},
+    });
+
+    final steps = RoutineService().buildSessionSteps(day, [
+      _item(
+        id: 'plank',
+        title: 'Plank',
+        categoryId: 'core',
+        videoUrl: 'https://example.com/plank.mp4',
+      ),
+      _item(
+        id: 'rightSidePlank',
+        title: 'Right side plank',
+        categoryId: 'core',
+        videoUrl: 'https://example.com/right-side-plank.mp4',
+      ),
+      _item(
+        id: 'leftSidePlank',
+        title: 'Left side plank',
+        categoryId: 'core',
+        videoUrl: 'https://example.com/left-side-plank.mp4',
+      ),
+    ]);
+
+    expect(steps[0].title, 'Right side plank');
+    expect(steps[0].item.id, 'rightSidePlank');
+    expect(steps[0].item.videoUrl, 'https://example.com/right-side-plank.mp4');
+    expect(steps[1].title, 'Left side plank');
+    expect(steps[1].item.id, 'leftSidePlank');
+    expect(steps[1].item.videoUrl, 'https://example.com/left-side-plank.mp4');
+  });
+
+  test(
+    'side plank steps fall back to generic plank when no side video exists',
+    () {
+      final day = RoutineDay.fromMap({
+        'key': 'tuesday',
+        'title_en': 'Core',
+        'index': 2,
+        'items': ['Each Side plank'],
+        'prescription': {'set': 1, 'rep': '30s', 'rest': '60s'},
+      });
+
+      final steps = RoutineService().buildSessionSteps(day, [
+        _item(id: 'plank', title: 'Plank', categoryId: 'core'),
+      ]);
+
+      expect(steps[0].item.id, 'plank');
+      expect(steps[1].item.id, 'plank');
+    },
+  );
+
   test('hosted videos are streamed and cached instead of bundled', () {
     final item = RoutineExerciseItem.fromMap(
       id: 'faceToWall',
@@ -222,6 +327,7 @@ RoutineExerciseItem _item({
   required String id,
   required String title,
   String categoryId = 'coolDown',
+  String videoUrl = '',
 }) {
   return RoutineExerciseItem(
     id: id,
@@ -229,7 +335,7 @@ RoutineExerciseItem _item({
     description: '',
     durationSeconds: 30,
     videoId: '',
-    videoUrl: '',
+    videoUrl: videoUrl,
     categoryId: categoryId,
   );
 }

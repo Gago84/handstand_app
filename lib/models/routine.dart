@@ -5,6 +5,7 @@ class RoutineDay {
     required this.label,
     required this.index,
     required this.items,
+    this.detailedItems = const [],
     required this.sets,
     required this.rep,
     required this.restSeconds,
@@ -16,6 +17,7 @@ class RoutineDay {
   final String label;
   final int index;
   final List<String> items;
+  final List<RoutinePlanItem> detailedItems;
   final int sets;
   final String rep;
   final int restSeconds;
@@ -35,6 +37,7 @@ class RoutineDay {
       label: data['label_en']?.toString() ?? '',
       index: _readInt(data['index']),
       items: _normalizeRoutineItems(data['items'] as List? ?? const []),
+      detailedItems: const [],
       sets: _readInt(prescription['set'], fallback: 1),
       rep: _repForDay(
         key: key,
@@ -51,6 +54,26 @@ class RoutineDay {
       isRestDay: data['rest'] == true,
     );
   }
+}
+
+class RoutinePlanItem {
+  const RoutinePlanItem({
+    required this.name,
+    required this.effortLabel,
+    required this.durationSeconds,
+    required this.restSeconds,
+    required this.sets,
+    required this.isTimed,
+    required this.videoUrl,
+  });
+
+  final String name;
+  final String effortLabel;
+  final int durationSeconds;
+  final int restSeconds;
+  final int sets;
+  final bool isTimed;
+  final String videoUrl;
 }
 
 class RoutineExerciseItem {
@@ -123,6 +146,7 @@ class RoutinePlan {
               label: '',
               index: 0,
               items: [],
+              detailedItems: [],
               sets: 1,
               rep: '',
               restSeconds: 0,

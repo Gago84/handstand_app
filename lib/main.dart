@@ -68,7 +68,12 @@ class HandstandApp extends StatelessWidget {
       title: 'Handstand Free',
       theme: ThemeData(primarySwatch: Colors.orange),
       home: enableUpgradeCheck
-          ? UpgradeAlert(showIgnore: false, showLater: true, child: startScreen)
+          ? UpgradeAlert(
+              upgrader: Upgrader(durationUntilAlertAgain: Duration.zero),
+              showIgnore: false,
+              showLater: true,
+              child: startScreen,
+            )
           : startScreen,
     );
   }

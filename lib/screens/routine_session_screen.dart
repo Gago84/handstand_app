@@ -32,19 +32,21 @@ class _RoutineSessionScreenState extends State<RoutineSessionScreen> {
   int _stepIndex = 0;
   int _remaining = 0;
   YoutubePlayerController? _youtubeController;
+  String? _activeVideoStepKey;
 
   RoutineSessionStep get _currentStep => widget.steps[_stepIndex];
   RoutineSessionStep? get _nextStep => _stepIndex < widget.steps.length - 1
       ? widget.steps[_stepIndex + 1]
       : null;
-  bool get _hasYoutubeVideo => _currentStep.item.videoId.isNotEmpty;
+  RoutineSessionStep get _displayedStep =>
+      _phase == _SessionPhase.rest ? _nextStep ?? _currentStep : _currentStep;
 
   @override
   void initState() {
     super.initState();
     if (widget.steps.isNotEmpty) {
       _stepIndex = widget.initialStepIndex.clamp(0, widget.steps.length - 1);
-      _prepareVideo();
+      _prepareVideoForStep(_currentStep, notify: false);
     }
   }
 
@@ -55,17 +57,33 @@ class _RoutineSessionScreenState extends State<RoutineSessionScreen> {
     super.dispose();
   }
 
-  void _prepareVideo() {
+  String _videoStepKey(RoutineSessionStep step) {
+    return [
+      step.item.id,
+      step.title,
+      step.item.videoId,
+      step.item.videoUrl,
+    ].join('|');
+  }
+
+  void _prepareVideoForStep(RoutineSessionStep step, {bool notify = true}) {
+    final videoStepKey = _videoStepKey(step);
+    if (_activeVideoStepKey == videoStepKey) {
+      return;
+    }
+
     _youtubeController?.dispose();
     _youtubeController = null;
+    _activeVideoStepKey = videoStepKey;
 
-    if (_hasYoutubeVideo) {
+    if (step.item.videoId.isNotEmpty) {
       _youtubeController = YoutubePlayerController(
-        initialVideoId: _currentStep.item.videoId,
+        initialVideoId: step.item.videoId,
         flags: const YoutubePlayerFlags(autoPlay: false, mute: false),
       );
-      if (mounted) setState(() {});
     }
+
+    if (notify && mounted) setState(() {});
   }
 
   void _startExercise() {
@@ -88,6 +106,7 @@ class _RoutineSessionScreenState extends State<RoutineSessionScreen> {
 
     if (_currentStep.restSeconds > 0 && _stepIndex < widget.steps.length - 1) {
       _startCountdown(_currentStep.restSeconds, _SessionPhase.rest);
+      _prepareVideoForStep(_nextStep!);
       return;
     }
 
@@ -110,7 +129,7 @@ class _RoutineSessionScreenState extends State<RoutineSessionScreen> {
       _phase = _SessionPhase.ready;
       _remaining = 0;
     });
-    _prepareVideo();
+    _prepareVideoForStep(_currentStep);
   }
 
   void _startCountdown(int seconds, _SessionPhase phase) {
@@ -171,6 +190,9 @@ class _RoutineSessionScreenState extends State<RoutineSessionScreen> {
                     440.0,
                   );
 
+                  final displayedStep = _displayedStep;
+                  final isPreviewingNext = _phase == _SessionPhase.rest;
+
                   return ListView(
                     padding: const EdgeInsets.fromLTRB(18, 6, 18, 16),
                     children: [
@@ -183,18 +205,27 @@ class _RoutineSessionScreenState extends State<RoutineSessionScreen> {
                       SizedBox(
                         height: videoHeight,
                         child: _VideoPanel(
-                          key: ValueKey(
-                            '${_currentStep.item.id}-${_currentStep.item.videoUrl}',
-                          ),
+                          key: ValueKey(_videoStepKey(displayedStep)),
                           youtubeController: _youtubeController,
-                          videoUrl: _currentStep.item.videoUrl,
-                          title: _currentStep.title,
-                          description: _currentStep.item.description,
+                          videoUrl: displayedStep.item.videoUrl,
+                          title: displayedStep.title,
+                          description: displayedStep.item.description,
                         ),
                       ),
                       const SizedBox(height: 16),
+                      if (isPreviewingNext) ...[
+                        const Text(
+                          'Up next',
+                          style: TextStyle(
+                            color: Colors.orange,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                      ],
                       Text(
-                        _currentStep.title,
+                        displayedStep.title,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 26,
@@ -203,7 +234,7 @@ class _RoutineSessionScreenState extends State<RoutineSessionScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Set ${_currentStep.setNumber}/${_currentStep.totalSets}',
+                        'Set ${displayedStep.setNumber}/${displayedStep.totalSets}',
                         style: const TextStyle(
                           color: Colors.orange,
                           fontSize: 16,
