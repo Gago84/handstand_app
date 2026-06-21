@@ -1,5 +1,9 @@
+import 'dart:io';
+
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:video_player/video_player.dart';
 
 import '../data/routine_service.dart';
 import '../models/routine.dart';
@@ -22,6 +26,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<int, int> _dayOverrides = const {};
   int? _selectedDayIndex;
   RoutineLevel _selectedLevel = RoutineLevel.beginner;
+  bool _basicStrengthPassed = false;
+  int _basicRequiredReps = 3;
+  bool _needsBasicPullUp = false;
+  bool _needsBasicPushUp = false;
 
   @override
   void initState() {
@@ -29,6 +37,60 @@ class _HomeScreenState extends State<HomeScreen> {
     _planFuture = _routineService.loadPlan(level: _selectedLevel);
     _loadDayOverrides();
     _loadRoutineLevel();
+    _loadBasicStrength();
+  }
+
+  Future<void> _loadBasicStrength() async {
+    final prefs = await SharedPreferences.getInstance();
+    final gender = prefs.getString('user_gender_v1');
+    final pullUpRange = prefs.getString('initial_pull_up_range_v1');
+    final pushUpRange = prefs.getString('initial_push_up_range_v1');
+    final savedPassed = prefs.getBool('basic_strength_passed_v1');
+    final legacyPassed = prefs.getBool('initial_requirements_passed') ?? false;
+
+    if (!mounted) return;
+    setState(() {
+      _basicRequiredReps = gender == 'female' ? 1 : 3;
+      _basicStrengthPassed = savedPassed ?? legacyPassed;
+      _needsBasicPullUp = pullUpRange == 'zero';
+      _needsBasicPushUp = pushUpRange == 'zero';
+    });
+  }
+
+  Future<void> _completeBasicStrength() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Complete Basic Strength?'),
+        content: Text(_basicCompletionMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Not yet'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('I completed it'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('basic_strength_passed_v1', true);
+    if (!mounted) return;
+    setState(() => _basicStrengthPassed = true);
+  }
+
+  String get _basicCompletionMessage {
+    final repLabel = _basicRequiredReps == 1 ? 'rep' : 'reps';
+    final exercises = [
+      if (_needsBasicPullUp) 'regular pull-up',
+      if (_needsBasicPushUp) 'regular push-up',
+    ].join(' and ');
+    return 'Confirm that you can complete $_basicRequiredReps $repLabel of '
+        '$exercises with good form.';
   }
 
   Future<void> _openPremium() async {
@@ -366,6 +428,14 @@ class _HomeScreenState extends State<HomeScreen> {
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             children: [
+              _BasicStrengthCard(
+                requiredReps: _basicRequiredReps,
+                passed: _basicStrengthPassed,
+                needsPullUp: _needsBasicPullUp,
+                needsPushUp: _needsBasicPushUp,
+                onComplete: _completeBasicStrength,
+              ),
+              const SizedBox(height: 16),
               _SelectedDayHeader(
                 daySlot: selectedDaySlot,
                 workoutDay: selectedWorkoutDay,
@@ -414,6 +484,390 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+class _BasicStrengthCard extends StatelessWidget {
+  const _BasicStrengthCard({
+    required this.requiredReps,
+    required this.passed,
+    required this.needsPullUp,
+    required this.needsPushUp,
+    required this.onComplete,
+  });
+
+  final int requiredReps;
+  final bool passed;
+  final bool needsPullUp;
+  final bool needsPushUp;
+  final VoidCallback onComplete;
+
+  @override
+  Widget build(BuildContext context) {
+    if (passed) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        decoration: BoxDecoration(
+          color: const Color(0xFF173523),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.green.withValues(alpha: 0.5)),
+        ),
+        child: const Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.greenAccent, size: 22),
+            SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Basic Strength completed',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final reps = requiredReps == 1 ? '1 rep' : '$requiredReps reps';
+    final goals = [
+      if (needsPullUp) '$reps regular pull-up',
+      if (needsPushUp) '$reps regular push-up',
+    ].join(' + ');
+    final practices = _basicStrengthPractices
+        .where(
+          (practice) =>
+              (practice.type == _BasicPracticeType.pullUp && needsPullUp) ||
+              (practice.type == _BasicPracticeType.pushUp && needsPushUp),
+        )
+        .toList(growable: false);
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1B1F22),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.orange.withValues(alpha: 0.55)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.fitness_center, color: Colors.orange, size: 22),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Basic Strength',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              Text(
+                'BASIC',
+                style: TextStyle(
+                  color: Colors.orange,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Goal: $goals',
+            style: const TextStyle(color: Colors.white, fontSize: 14),
+          ),
+          const SizedBox(height: 10),
+          const Text(
+            'Train for your first rep',
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          for (final practice in practices) ...[
+            _BasicPracticeTile(practice: practice),
+            if (practice != practices.last) const SizedBox(height: 8),
+          ],
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: onComplete,
+              icon: const Icon(Icons.flag_outlined),
+              label: const Text('Mark Basic Strength as completed'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.orange,
+                side: const BorderSide(color: Colors.orange),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+const _basicStrengthPractices = <_BasicPractice>[
+  _BasicPractice(
+    type: _BasicPracticeType.pullUp,
+    title: 'Resistance band for first pull-up',
+    description: 'Use a band to practice the full pull-up range.',
+    videoUrl:
+        'https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Fbasic-equipment%2Frequirements%2Fresistance-band-pull-up.mp4?alt=media&token=70abddb9-c0a0-40ee-9120-7fc933669b70',
+  ),
+  _BasicPractice(
+    type: _BasicPracticeType.pullUp,
+    title: 'Negative pull-up',
+    description: 'Start at the top and lower slowly with control.',
+    videoUrl:
+        'https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Fbasic-equipment%2Frequirements%2Fnegative-pull-up.mp4?alt=media&token=fdcd590b-d37d-4035-a783-aa057c450a78',
+  ),
+  _BasicPractice(
+    type: _BasicPracticeType.pushUp,
+    title: 'Incline push-up',
+    description: 'Build pushing strength with hands on a raised surface.',
+    videoUrl:
+        'https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Fbasic-equipment%2Frequirements%2Fincline-push-up.mp4?alt=media&token=70c68a6f-5565-455e-b3bb-052587ca625e',
+  ),
+];
+
+enum _BasicPracticeType { pullUp, pushUp }
+
+class _BasicPractice {
+  const _BasicPractice({
+    required this.type,
+    required this.title,
+    required this.description,
+    required this.videoUrl,
+  });
+
+  final _BasicPracticeType type;
+  final String title;
+  final String description;
+  final String videoUrl;
+}
+
+class _BasicPracticeTile extends StatelessWidget {
+  const _BasicPracticeTile({required this.practice});
+
+  final _BasicPractice practice;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white.withValues(alpha: 0.06),
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: () => showModalBottomSheet<void>(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: const Color(0xFF171A1D),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+          ),
+          builder: (_) => _BasicPracticeVideoSheet(practice: practice),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: Colors.orange.withValues(alpha: 0.14),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.play_arrow_rounded,
+                  color: Colors.orange,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      practice.title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      practice.description,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white54,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: Colors.white38),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BasicPracticeVideoSheet extends StatefulWidget {
+  const _BasicPracticeVideoSheet({required this.practice});
+
+  final _BasicPractice practice;
+
+  @override
+  State<_BasicPracticeVideoSheet> createState() =>
+      _BasicPracticeVideoSheetState();
+}
+
+class _BasicPracticeVideoSheetState extends State<_BasicPracticeVideoSheet> {
+  VideoPlayerController? _controller;
+  Future<void>? _initializeFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeFuture = _initializeVideo();
+  }
+
+  Future<void> _initializeVideo() async {
+    final cachedFile = await DefaultCacheManager().getFileFromCache(
+      widget.practice.videoUrl,
+    );
+    final controller = cachedFile == null
+        ? VideoPlayerController.networkUrl(Uri.parse(widget.practice.videoUrl))
+        : VideoPlayerController.file(File(cachedFile.file.path));
+    _controller = controller;
+    await controller.initialize();
+    await controller.setLooping(true);
+    if (!mounted) return;
+    await controller.play();
+    if (cachedFile == null) {
+      DefaultCacheManager().downloadFile(widget.practice.videoUrl);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(18, 12, 18, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 42,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              widget.practice.title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              widget.practice.description,
+              style: const TextStyle(color: Colors.white60, fontSize: 14),
+            ),
+            const SizedBox(height: 16),
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  color: Colors.black,
+                  child: FutureBuilder<void>(
+                    future: _initializeFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return const Center(
+                          child: Text(
+                            'Video could not load',
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                        );
+                      }
+                      if (snapshot.connectionState != ConnectionState.done ||
+                          _controller == null) {
+                        return const Center(
+                          child: CircularProgressIndicator(
+                            color: Colors.orange,
+                          ),
+                        );
+                      }
+                      return Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          SizedBox.expand(
+                            child: FittedBox(
+                              fit: BoxFit.contain,
+                              child: SizedBox(
+                                width: _controller!.value.size.width,
+                                height: _controller!.value.size.height,
+                                child: VideoPlayer(_controller!),
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            iconSize: 58,
+                            color: Colors.white.withValues(alpha: 0.9),
+                            onPressed: () {
+                              setState(() {
+                                _controller!.value.isPlaying
+                                    ? _controller!.pause()
+                                    : _controller!.play();
+                              });
+                            },
+                            icon: Icon(
+                              _controller!.value.isPlaying
+                                  ? Icons.pause_circle_outline
+                                  : Icons.play_circle_outline,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

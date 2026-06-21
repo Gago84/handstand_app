@@ -23,14 +23,14 @@ void main() async {
 
   final prefs = await SharedPreferences.getInstance();
   final skipWelcome = prefs.getBool('skip_welcome_screen') ?? false;
-  final passedRequirements =
+  final completedOnboarding =
       prefs.getBool('initial_requirements_passed') ?? false;
   final premiumActive = await PremiumAccessService.hasActiveCachedPremium();
 
   runApp(
     HandstandApp(
       skipWelcome: skipWelcome,
-      passedRequirements: passedRequirements,
+      passedRequirements: completedOnboarding,
       premiumActive: premiumActive,
     ),
   );

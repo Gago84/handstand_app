@@ -1,14 +1,26 @@
-import 'dart:io';
 import 'dart:ui';
 
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:video_player/video_player.dart';
 
 import '../config/premium_gate.dart';
+import '../data/routine_service.dart';
 import 'home_screen.dart';
 import 'premium_screen.dart';
+
+enum _Gender { female, male }
+
+enum _RepRange {
+  zero('0 reps', RoutineLevel.beginner),
+  oneToThree('1–3 reps', RoutineLevel.beginner),
+  fourToSix('4–6 reps', RoutineLevel.intermediate),
+  sevenToTen('7–10 reps', RoutineLevel.advance);
+
+  const _RepRange(this.label, this.level);
+
+  final String label;
+  final RoutineLevel level;
+}
 
 class PrerequisiteScreen extends StatefulWidget {
   const PrerequisiteScreen({super.key});
@@ -19,32 +31,37 @@ class PrerequisiteScreen extends StatefulWidget {
 
 class _PrerequisiteScreenState extends State<PrerequisiteScreen> {
   _Gender? _gender;
-  bool? _canPullUp;
-  bool? _canPushUp;
-  bool _showRequirements = false;
+  _RepRange? _pullUps;
+  _RepRange? _pushUps;
+  bool _isCreatingPlan = false;
 
-  int get _requiredReps => _gender == _Gender.female ? 1 : 3;
-  String get _repLabel => _requiredReps == 1 ? 'rep' : 'reps';
-  bool get _answered => _canPullUp != null && _canPushUp != null;
-  bool get _canAccessProgram => _canPullUp == true && _canPushUp == true;
+  bool get _isComplete =>
+      _gender != null && _pullUps != null && _pushUps != null;
+
+  RoutineLevel get _initialLevel {
+    final pullLevel = _pullUps!.level;
+    final pushLevel = _pushUps!.level;
+    return pullLevel.index <= pushLevel.index ? pullLevel : pushLevel;
+  }
 
   Future<void> _continue() async {
-    if (!_answered) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please answer both questions')),
-      );
-      return;
-    }
+    if (!_isComplete || _isCreatingPlan) return;
 
-    if (!_canAccessProgram) {
-      setState(() {
-        _showRequirements = true;
-      });
-      return;
-    }
-
+    final basicPassed =
+        _pullUps != _RepRange.zero && _pushUps != _RepRange.zero;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('initial_requirements_passed', true);
+    await Future.wait([
+      prefs.setString('user_gender_v1', _gender!.name),
+      prefs.setString('initial_pull_up_range_v1', _pullUps!.name),
+      prefs.setString('initial_push_up_range_v1', _pushUps!.name),
+      prefs.setString('routine_level_v1', _initialLevel.name),
+      prefs.setBool('basic_strength_passed_v1', basicPassed),
+      prefs.setBool('initial_requirements_passed', true),
+    ]);
+
+    if (!mounted) return;
+    setState(() => _isCreatingPlan = true);
+    await Future<void>.delayed(const Duration(seconds: 2));
 
     if (!mounted) return;
     Navigator.pushReplacement(
@@ -57,28 +74,6 @@ class _PrerequisiteScreenState extends State<PrerequisiteScreen> {
     );
   }
 
-  void _resetAnswers() {
-    setState(() {
-      _showRequirements = false;
-    });
-  }
-
-  void _selectGender(_Gender gender) {
-    setState(() {
-      _gender = gender;
-      _canPullUp = null;
-      _canPushUp = null;
-    });
-  }
-
-  void _changeGender() {
-    setState(() {
-      _gender = null;
-      _canPullUp = null;
-      _canPushUp = null;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,716 +84,258 @@ class _PrerequisiteScreenState extends State<PrerequisiteScreen> {
           ),
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-            child: Container(color: Colors.black.withValues(alpha: 0.45)),
+            child: Container(color: Colors.black.withValues(alpha: 0.55)),
           ),
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
-              child: _showRequirements
-                  ? _buildRequirements(context)
-                  : _gender == null
-                  ? _buildGenderQuestion(context)
-                  : _buildQuestions(context),
-            ),
+            child: _isCreatingPlan
+                ? const _CreatingPlanView()
+                : _buildQuestions(),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildGenderQuestion(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isCompact = constraints.maxHeight < 760;
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    SizedBox(height: isCompact ? 8 : 24),
-                    Icon(
-                      Icons.person_outline,
-                      size: isCompact ? 54 : 64,
-                      color: Colors.white,
-                    ),
-                    SizedBox(height: isCompact ? 18 : 24),
-                    const Text(
-                      'Tell Us About Yourself',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    const Text(
-                      'What is your gender?',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 16,
-                        height: 1.5,
-                      ),
-                    ),
-                    SizedBox(height: isCompact ? 24 : 36),
-                    Row(
+  Widget _buildQuestions() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            'Let’s Personalize Your Plan',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Three quick questions to choose your starting level.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white70, fontSize: 14),
+          ),
+          const SizedBox(height: 18),
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _QuestionCard(
+                    number: 1,
+                    question: 'What is your gender?',
+                    child: Row(
                       children: [
                         Expanded(
-                          child: _AnswerButton(
+                          child: _ChoiceButton(
                             label: 'Female',
-                            selected: false,
-                            onPressed: () => _selectGender(_Gender.female),
+                            selected: _gender == _Gender.female,
+                            onTap: () =>
+                                setState(() => _gender = _Gender.female),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 10),
                         Expanded(
-                          child: _AnswerButton(
+                          child: _ChoiceButton(
                             label: 'Male',
-                            selected: false,
-                            onPressed: () => _selectGender(_Gender.male),
+                            selected: _gender == _Gender.male,
+                            onTap: () => setState(() => _gender = _Gender.male),
                           ),
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildQuestions(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isCompact = constraints.maxHeight < 760;
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    SizedBox(height: isCompact ? 8 : 24),
-                    Icon(
-                      Icons.fact_check_outlined,
-                      size: isCompact ? 54 : 64,
-                      color: Colors.white,
-                    ),
-                    SizedBox(height: isCompact ? 18 : 24),
-                    const Text(
-                      'Initial Requirements',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    const Text(
-                      'Answer these two questions before starting the program.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 16,
-                        height: 1.5,
-                      ),
-                    ),
-                    SizedBox(height: isCompact ? 24 : 36),
-                    _QuestionBlock(
-                      question:
-                          'Can you do $_requiredReps $_repLabel of regular pull up?',
-                      compact: isCompact,
-                      value: _canPullUp,
-                      onChanged: (value) {
-                        setState(() {
-                          _canPullUp = value;
-                        });
-                      },
-                    ),
-                    SizedBox(height: isCompact ? 16 : 20),
-                    _QuestionBlock(
-                      question:
-                          'Can you do $_requiredReps $_repLabel of regular push up?',
-                      compact: isCompact,
-                      value: _canPushUp,
-                      onChanged: (value) {
-                        setState(() {
-                          _canPushUp = value;
-                        });
-                      },
-                    ),
-                    SizedBox(height: isCompact ? 16 : 24),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  foregroundColor: Colors.deepPurple,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
                   ),
-                ),
-                onPressed: _continue,
-                child: const Text(
-                  'Continue',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: _changeGender,
-              child: const Text(
-                'Change gender',
-                style: TextStyle(color: Colors.white70),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildRequirements(BuildContext context) {
-    final requirements = <_RequirementPractice>[
-      if (_canPullUp == false) _requirementPractices[0],
-      if (_canPullUp == false) _requirementPractices[1],
-      if (_canPushUp == false) _requirementPractices[2],
-    ];
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isCompact = constraints.maxHeight < 760;
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    SizedBox(height: isCompact ? 8 : 24),
-                    Icon(
-                      Icons.lock_outline,
-                      size: isCompact ? 54 : 64,
-                      color: Colors.white,
+                  const SizedBox(height: 12),
+                  _QuestionCard(
+                    number: 2,
+                    question: 'How many pull-ups can you do?',
+                    child: _RangeChoices(
+                      value: _pullUps,
+                      onChanged: (value) => setState(() => _pullUps = value),
                     ),
-                    SizedBox(height: isCompact ? 18 : 24),
-                    const Text(
-                      'Build Your Foundation First',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Come back when you pass the initial requirements.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 16,
-                        height: 1.5,
-                      ),
-                    ),
-                    SizedBox(height: isCompact ? 24 : 28),
-                    Container(
-                      padding: EdgeInsets.all(isCompact ? 16 : 18),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.42),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.white24),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Required practice',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-                          for (final requirement in requirements)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 16),
-                              child: _RequirementVideoCard(
-                                practice: requirement,
-                                compact: isCompact,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: isCompact ? 16 : 24),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  foregroundColor: Colors.deepPurple,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
                   ),
-                ),
-                onPressed: _resetAnswers,
-                child: const Text(
-                  'Answer Again',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                ),
+                  const SizedBox(height: 12),
+                  _QuestionCard(
+                    number: 3,
+                    question: 'How many push-ups can you do?',
+                    child: _RangeChoices(
+                      value: _pushUps,
+                      onChanged: (value) => setState(() => _pushUps = value),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        );
-      },
+          ),
+          const SizedBox(height: 14),
+          ElevatedButton(
+            onPressed: _isComplete ? _continue : null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.black,
+              disabledBackgroundColor: Colors.white24,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            child: const Text(
+              'Create My Plan',
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
-enum _Gender { female, male }
-
-const _requirementPractices = <_RequirementPractice>[
-  _RequirementPractice(
-    title: 'Resistance band pull up',
-    description:
-        'Use the band to reduce bodyweight and practice the full pull-up range.',
-    videoUrl:
-        'https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Fbasic-equipment%2Frequirements%2Fresistance-band-pull-up.mp4?alt=media&token=70abddb9-c0a0-40ee-9120-7fc933669b70',
-  ),
-  _RequirementPractice(
-    title: 'Negative pull up',
-    description:
-        'Start at the top of the pull up, then lower slowly with control.',
-    videoUrl:
-        'https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Fbasic-equipment%2Frequirements%2Fnegative-pull-up.mp4?alt=media&token=fdcd590b-d37d-4035-a783-aa057c450a78',
-  ),
-  _RequirementPractice(
-    title: 'Incline push up',
-    description:
-        'Place your hands on a raised surface to make pushups easier while building strength.',
-    videoUrl:
-        'https://firebasestorage.googleapis.com/v0/b/banana-57559.firebasestorage.app/o/exercise%2Fbasic-equipment%2Frequirements%2Fincline-push-up.mp4?alt=media&token=70c68a6f-5565-455e-b3bb-052587ca625e',
-  ),
-];
-
-class _RequirementPractice {
-  const _RequirementPractice({
-    required this.title,
-    required this.description,
-    required this.videoUrl,
+class _QuestionCard extends StatelessWidget {
+  const _QuestionCard({
+    required this.number,
+    required this.question,
+    required this.child,
   });
 
-  final String title;
-  final String description;
-  final String videoUrl;
-}
-
-class _RequirementVideoCard extends StatefulWidget {
-  const _RequirementVideoCard({required this.practice, required this.compact});
-
-  final _RequirementPractice practice;
-  final bool compact;
-
-  @override
-  State<_RequirementVideoCard> createState() => _RequirementVideoCardState();
-}
-
-class _RequirementVideoCardState extends State<_RequirementVideoCard> {
-  VideoPlayerController? _controller;
-  Future<void>? _initializeFuture;
-  bool _isCaching = false;
-  bool _isPreparingPlayback = false;
-  String? _error;
-
-  @override
-  void dispose() {
-    _controller?.removeListener(_videoListener);
-    _controller?.dispose();
-    super.dispose();
-  }
-
-  Future<void> _playVideo() async {
-    if (_controller != null || _isPreparingPlayback) {
-      return;
-    }
-
-    try {
-      setState(() {
-        _isPreparingPlayback = true;
-        _isCaching = false;
-        _error = null;
-      });
-
-      final cachedFile = await DefaultCacheManager().getFileFromCache(
-        widget.practice.videoUrl,
-      );
-      final controller = cachedFile == null
-          ? VideoPlayerController.networkUrl(
-              Uri.parse(widget.practice.videoUrl),
-            )
-          : VideoPlayerController.file(File(cachedFile.file.path));
-      final initializeFuture = _initializeAndPlay(controller);
-
-      controller.addListener(_videoListener);
-
-      setState(() {
-        _controller = controller;
-        _initializeFuture = initializeFuture;
-        _isPreparingPlayback = false;
-        _isCaching = cachedFile == null;
-      });
-
-      if (cachedFile == null) {
-        _cacheInBackground(widget.practice.videoUrl);
-      }
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _isPreparingPlayback = false;
-        _isCaching = false;
-        _error = error.toString();
-      });
-    }
-  }
-
-  Future<void> _initializeAndPlay(VideoPlayerController controller) async {
-    await controller.initialize();
-    await controller.setLooping(true);
-    if (!mounted) return;
-    await controller.play();
-  }
-
-  Future<void> _cacheInBackground(String videoUrl) async {
-    try {
-      await DefaultCacheManager().downloadFile(videoUrl);
-    } finally {
-      if (mounted && widget.practice.videoUrl == videoUrl) {
-        setState(() {
-          _isCaching = false;
-        });
-      }
-    }
-  }
-
-  void _videoListener() {
-    if (mounted) setState(() {});
-  }
+  final int number;
+  final String question;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    final videoHeight = widget.compact ? 210.0 : 260.0;
-
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(8),
+        color: Colors.black.withValues(alpha: 0.38),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: Colors.white24),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Icon(
-                Icons.check_circle_outline,
-                color: Colors.orange,
-                size: 20,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  widget.practice.title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                    height: 1.25,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
           Text(
-            widget.practice.description,
+            '$number. $question',
             style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 14,
-              height: 1.35,
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 12),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+class _RangeChoices extends StatelessWidget {
+  const _RangeChoices({required this.value, required this.onChanged});
+
+  final _RepRange? value;
+  final ValueChanged<_RepRange> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final range in _RepRange.values)
           SizedBox(
-            height: videoHeight,
-            width: double.infinity,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                color: const Color(0xFF111513),
-                child: _buildVideoContent(),
-              ),
+            width: (MediaQuery.sizeOf(context).width - 82) / 2,
+            child: _ChoiceButton(
+              label: range.label,
+              selected: value == range,
+              onTap: () => onChanged(range),
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildVideoContent() {
-    if (_error != null) {
-      return const _RequirementVideoPlaceholder(
-        icon: Icons.error_outline,
-        label: 'Video could not load',
-      );
-    }
-
-    if (_controller == null) {
-      if (_isPreparingPlayback) {
-        return const Center(child: CircularProgressIndicator());
-      }
-
-      return _RequirementVideoPlaceholder(
-        icon: Icons.play_circle_outline,
-        label: 'Watch instruction video',
-        onTap: _playVideo,
-      );
-    }
-
-    return FutureBuilder<void>(
-      future: _initializeFuture,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return const _RequirementVideoPlaceholder(
-            icon: Icons.error_outline,
-            label: 'Video could not load',
-          );
-        }
-
-        if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        return Stack(
-          alignment: Alignment.center,
-          children: [
-            SizedBox.expand(
-              child: FittedBox(
-                fit: BoxFit.contain,
-                child: SizedBox(
-                  width: _controller!.value.size.width,
-                  height: _controller!.value.size.height,
-                  child: VideoPlayer(_controller!),
-                ),
-              ),
-            ),
-            IconButton(
-              iconSize: 56,
-              color: Colors.white.withValues(alpha: 0.9),
-              onPressed: () {
-                if (_controller!.value.isPlaying) {
-                  _controller!.pause();
-                } else {
-                  _controller!.play();
-                }
-              },
-              icon: Icon(
-                _controller!.value.isPlaying
-                    ? Icons.pause_circle_outline
-                    : Icons.play_circle_outline,
-              ),
-            ),
-            if (_isCaching)
-              Positioned(
-                right: 10,
-                bottom: 10,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.62),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        width: 12,
-                        height: 12,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                      SizedBox(width: 6),
-                      Text(
-                        'Caching offline',
-                        style: TextStyle(color: Colors.white, fontSize: 11),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-          ],
-        );
-      },
+      ],
     );
   }
 }
 
-class _RequirementVideoPlaceholder extends StatelessWidget {
-  const _RequirementVideoPlaceholder({
-    required this.icon,
-    required this.label,
-    this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: Colors.white54, size: 52),
-            const SizedBox(height: 10),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _QuestionBlock extends StatelessWidget {
-  const _QuestionBlock({
-    required this.question,
-    this.compact = false,
-    required this.value,
-    required this.onChanged,
-  });
-
-  final String question;
-  final bool compact;
-  final bool? value;
-  final ValueChanged<bool> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(compact ? 16 : 18),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.42),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white24),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            question,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              height: 1.3,
-            ),
-          ),
-          SizedBox(height: compact ? 14 : 16),
-          Row(
-            children: [
-              Expanded(
-                child: _AnswerButton(
-                  label: 'Yes',
-                  selected: value == true,
-                  onPressed: () => onChanged(true),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _AnswerButton(
-                  label: 'No',
-                  selected: value == false,
-                  onPressed: () => onChanged(false),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AnswerButton extends StatelessWidget {
-  const _AnswerButton({
+class _ChoiceButton extends StatelessWidget {
+  const _ChoiceButton({
     required this.label,
     required this.selected,
-    required this.onPressed,
+    required this.onTap,
   });
 
   final String label;
   final bool selected;
-  final VoidCallback onPressed;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
-      style: OutlinedButton.styleFrom(
-        foregroundColor: selected ? Colors.black : Colors.white,
-        backgroundColor: selected ? Colors.orange : Colors.transparent,
-        side: BorderSide(
-          color: selected ? Colors.orange : Colors.white54,
-          width: 1.5,
+    return Material(
+      color: selected ? Colors.orange : Colors.white10,
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          height: 44,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: selected ? Colors.orangeAccent : Colors.white24,
+            ),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: selected ? Colors.black : Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ),
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
-      onPressed: onPressed,
-      child: Text(
-        label,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+    );
+  }
+}
+
+class _CreatingPlanView extends StatelessWidget {
+  const _CreatingPlanView();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Padding(
+        padding: EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 56,
+              height: 56,
+              child: CircularProgressIndicator(
+                color: Colors.orange,
+                strokeWidth: 5,
+              ),
+            ),
+            SizedBox(height: 28),
+            Text(
+              'Designing your workout plan…',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            SizedBox(height: 10),
+            Text(
+              'Matching the program to your current strength.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white70, fontSize: 15),
+            ),
+          ],
+        ),
       ),
     );
   }

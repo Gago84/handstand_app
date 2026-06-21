@@ -2,6 +2,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../Services/premium_access_service.dart';
+import '../config/premium_gate.dart';
+import 'home_screen.dart';
+import 'premium_screen.dart';
 import 'prerequisite_screen.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -183,11 +187,21 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   Future<void> _savePreferenceAndContinue() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('skip_welcome_screen', _skipNextTime);
+    final completedOnboarding =
+        prefs.getBool('initial_requirements_passed') ?? false;
+
+    Widget nextScreen = const PrerequisiteScreen();
+    if (completedOnboarding) {
+      final premiumActive = await PremiumAccessService.hasActiveCachedPremium();
+      nextScreen = premiumActive || PremiumGate.bypassForLocalTesting
+          ? const HomeScreen()
+          : const PremiumScreen(requirePurchase: true);
+    }
 
     if (!mounted) return;
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const PrerequisiteScreen()),
+      MaterialPageRoute(builder: (_) => nextScreen),
     );
   }
 }
