@@ -42,6 +42,8 @@ class _PremiumScreenState extends State<PremiumScreen> {
   bool _isRestoring = false;
   bool _isPremium = false;
   bool _autoRestoreAttempted = false;
+  bool _restoreDeliveredPurchase = false;
+  Timer? _restoreFallbackTimer;
   String? _message;
 
   Set<String> get _productIds {
@@ -67,6 +69,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
 
   @override
   void dispose() {
+    _restoreFallbackTimer?.cancel();
     _purchaseSubscription.cancel();
     super.dispose();
   }
@@ -191,22 +194,25 @@ class _PremiumScreenState extends State<PremiumScreen> {
 
   Future<void> _restorePurchases({bool silent = false}) async {
     if (_isRestoring) return;
+    _restoreFallbackTimer?.cancel();
     setState(() {
       _isRestoring = true;
+      _restoreDeliveredPurchase = false;
       _message = silent ? 'Checking active subscription...' : null;
     });
     try {
       await _inAppPurchase.restorePurchases();
-      if (mounted) {
+      _restoreFallbackTimer = Timer(const Duration(seconds: 4), () {
+        if (!mounted || _restoreDeliveredPurchase) return;
         setState(() {
-          _message ??= silent
+          _isRestoring = false;
+          _message = silent
               ? 'No active subscription was restored.'
-              : 'Restore request completed.';
+              : 'Restore request completed. If you still cannot access Premium, tap restore again.';
         });
-      }
+      });
     } catch (error) {
       _setMessage('Could not restore purchases: $error');
-    } finally {
       if (mounted) {
         setState(() {
           _isRestoring = false;
@@ -236,8 +242,14 @@ class _PremiumScreenState extends State<PremiumScreen> {
           purchase,
         );
         if (accepted) {
+          _restoreFallbackTimer?.cancel();
           await _loadPremiumState();
-          _setMessage('Premium is active.');
+          if (!mounted) return;
+          setState(() {
+            _isRestoring = false;
+            _restoreDeliveredPurchase = true;
+            _message = 'Premium is active.';
+          });
           if (widget.requirePurchase) {
             _goToHome();
           }
@@ -245,7 +257,11 @@ class _PremiumScreenState extends State<PremiumScreen> {
           _setMessage('The store purchase could not be verified.');
         }
       } else if (purchase.status == PurchaseStatus.canceled) {
-        _setMessage('Purchase canceled.');
+        if (widget.requirePurchase && _isApplePlatform && !_isRestoring) {
+          await _restorePurchases(silent: true);
+        } else {
+          _setMessage('Purchase canceled.');
+        }
       }
 
       if (purchase.pendingCompletePurchase && shouldCompletePurchase) {
@@ -253,6 +269,10 @@ class _PremiumScreenState extends State<PremiumScreen> {
       }
     }
   }
+
+  bool get _isApplePlatform =>
+      defaultTargetPlatform == TargetPlatform.iOS ||
+      defaultTargetPlatform == TargetPlatform.macOS;
 
   void _setMessage(String message) {
     if (!mounted) return;

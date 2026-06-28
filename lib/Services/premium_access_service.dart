@@ -3,10 +3,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class PremiumAccessService {
   static const _legacyPremiumKey = 'premium_active';
+  static const _legacyMigrationUsedKey = 'premium_legacy_migration_used';
   static const _expiryKey = 'premium_expiry_milliseconds';
   static const _productKey = 'premium_product_id';
   static const _pendingAndroidDurationDaysKey =
       'premium_pending_android_duration_days';
+  static const _legacyMigrationGrace = Duration(days: 7);
 
   static const _subscriptionDurations = <String, Duration>{
     'premium_monthly': Duration(days: 31),
@@ -31,6 +33,17 @@ class PremiumAccessService {
     final currentTime = now ?? DateTime.now();
 
     if (expiryMilliseconds == null) {
+      final hadLegacyPremium = prefs.getBool(_legacyPremiumKey) ?? false;
+      final migrationUsed = prefs.getBool(_legacyMigrationUsedKey) ?? false;
+      if (hadLegacyPremium && !migrationUsed) {
+        final expiry = currentTime.add(_legacyMigrationGrace);
+        await prefs.setInt(_expiryKey, expiry.millisecondsSinceEpoch);
+        await prefs.setString(_productKey, 'legacy_migration');
+        await prefs.setBool(_legacyMigrationUsedKey, true);
+        await prefs.remove(_legacyPremiumKey);
+        return true;
+      }
+
       await prefs.remove(_legacyPremiumKey);
       return false;
     }
@@ -76,6 +89,7 @@ class PremiumAccessService {
     await prefs.setInt(_expiryKey, expiry.millisecondsSinceEpoch);
     await prefs.setString(_productKey, purchase.productID);
     await prefs.remove(_legacyPremiumKey);
+    await prefs.setBool(_legacyMigrationUsedKey, true);
     await prefs.remove(_pendingAndroidDurationDaysKey);
     return true;
   }

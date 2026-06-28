@@ -11,16 +11,38 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  test('legacy permanent premium flag is removed', () async {
+  test('legacy premium flag gets one short migration grace period', () async {
     SharedPreferences.setMockInitialValues({'premium_active': true});
 
+    expect(await PremiumAccessService.hasActiveCachedPremium(now: now), isTrue);
     expect(
-      await PremiumAccessService.hasActiveCachedPremium(now: now),
+      await PremiumAccessService.hasActiveCachedPremium(
+        now: now.add(const Duration(days: 6)),
+      ),
+      isTrue,
+    );
+    expect(
+      await PremiumAccessService.hasActiveCachedPremium(
+        now: now.add(const Duration(days: 8)),
+      ),
       isFalse,
     );
 
     final prefs = await SharedPreferences.getInstance();
     expect(prefs.containsKey('premium_active'), isFalse);
+    expect(prefs.getBool('premium_legacy_migration_used'), isTrue);
+  });
+
+  test('legacy migration is not repeated', () async {
+    SharedPreferences.setMockInitialValues({
+      'premium_active': true,
+      'premium_legacy_migration_used': true,
+    });
+
+    expect(
+      await PremiumAccessService.hasActiveCachedPremium(now: now),
+      isFalse,
+    );
   });
 
   test('accepted store purchase creates an expiring entitlement', () async {
